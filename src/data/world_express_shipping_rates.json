@@ -1,0 +1,478 @@
+{
+  "company": "World Express",
+  "currency": "DZD",
+  "notes": {
+    "max_weight_base": "5KG (real or volumetric)",
+    "extra_weight_standard": "60 DA/KG, max 20KG | Returns: 30 DA/KG",
+    "extra_weight_double_star": "100 DA/KG, max 20KG | Returns: 500 DA/KG",
+    "ecommerce_max_parcels": "120 colis/month",
+    "volumetric_formula": "Length(m) x Width(m) x Height(m) x 200 = KG",
+    "valid_until": "31/12/2025"
+  },
+  "wilayas": [
+    {
+      "code": 28,
+      "wilaya": "M'Sila",
+      "tarif_stop_desk_sans_compte": 400,
+      "tarif_domicile_sans_compte": 500,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 16,
+      "wilaya": "Alger",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 2,
+      "wilaya": "Chlef",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 9,
+      "wilaya": "Blida",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 10,
+      "wilaya": "Bouira",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 15,
+      "wilaya": "Tizi Ouzou",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 19,
+      "wilaya": "Sétif",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 25,
+      "wilaya": "Constantine",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 26,
+      "wilaya": "Médéa",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 31,
+      "wilaya": "Oran",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 34,
+      "wilaya": "Bordj Bou Arreridj",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 35,
+      "wilaya": "Boumerdès",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 42,
+      "wilaya": "Tipaza",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 11,
+      "wilaya": "Aïn Defla",
+      "tarif_stop_desk_sans_compte": 500,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 4,
+      "wilaya": "Oum El Bouaghi",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 5,
+      "wilaya": "Batna",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 6,
+      "wilaya": "Béjaïa",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 13,
+      "wilaya": "Tlemcen",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 14,
+      "wilaya": "Tiaret",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 18,
+      "wilaya": "Jijel",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 21,
+      "wilaya": "Skikda",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 22,
+      "wilaya": "Sidi Bel Abbès",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 23,
+      "wilaya": "Annaba",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 27,
+      "wilaya": "Mostaganem",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 38,
+      "wilaya": "Tissemsilt",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 43,
+      "wilaya": "Mila",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 48,
+      "wilaya": "Relizane",
+      "tarif_stop_desk_sans_compte": 550,
+      "tarif_domicile_sans_compte": 900,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 17,
+      "wilaya": "Djelfa",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 20,
+      "wilaya": "Saïda",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 24,
+      "wilaya": "Guelma",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 29,
+      "wilaya": "Mascara",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 40,
+      "wilaya": "Khenchela",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 41,
+      "wilaya": "Souk Ahras",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 3,
+      "wilaya": "Aïn Témouchent",
+      "tarif_stop_desk_sans_compte": 650,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 150,
+      "double_star": false
+    },
+    {
+      "code": 7,
+      "wilaya": "Biskra",
+      "tarif_stop_desk_sans_compte": 700,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 12,
+      "wilaya": "Tébessa",
+      "tarif_stop_desk_sans_compte": 700,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 36,
+      "wilaya": "El Tarf",
+      "tarif_stop_desk_sans_compte": 700,
+      "tarif_domicile_sans_compte": 1000,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 33,
+      "wilaya": "Laghouat",
+      "tarif_stop_desk_sans_compte": 800,
+      "tarif_domicile_sans_compte": 1100,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 45,
+      "wilaya": "Ouled Djelaïl",
+      "tarif_stop_desk_sans_compte": 800,
+      "tarif_domicile_sans_compte": 1100,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 30,
+      "wilaya": "Ouargla",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 32,
+      "wilaya": "El Bayadh",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 39,
+      "wilaya": "El Oued",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 44,
+      "wilaya": "Naâma",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 47,
+      "wilaya": "Ghardaïa",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 55,
+      "wilaya": "Touggourt",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 57,
+      "wilaya": "El M'Ghair",
+      "tarif_stop_desk_sans_compte": 900,
+      "tarif_domicile_sans_compte": 1200,
+      "tarif_retour": 200,
+      "double_star": false
+    },
+    {
+      "code": 58,
+      "wilaya": "El Meniaa",
+      "tarif_stop_desk_sans_compte": 1100,
+      "tarif_domicile_sans_compte": 1400,
+      "tarif_retour": 350,
+      "double_star": true
+    },
+    {
+      "code": 1,
+      "wilaya": "Adrar",
+      "tarif_stop_desk_sans_compte": 1200,
+      "tarif_domicile_sans_compte": 1500,
+      "tarif_retour": 350,
+      "double_star": true
+    },
+    {
+      "code": 8,
+      "wilaya": "Béchar",
+      "tarif_stop_desk_sans_compte": 1200,
+      "tarif_domicile_sans_compte": 1500,
+      "tarif_retour": 350,
+      "double_star": true
+    },
+    {
+      "code": 49,
+      "wilaya": "Timimoun",
+      "tarif_stop_desk_sans_compte": 1200,
+      "tarif_domicile_sans_compte": 1500,
+      "tarif_retour": 350,
+      "double_star": true
+    },
+    {
+      "code": 52,
+      "wilaya": "Beni Abbès",
+      "tarif_stop_desk_sans_compte": 1200,
+      "tarif_domicile_sans_compte": 1500,
+      "tarif_retour": 350,
+      "double_star": true
+    },
+    {
+      "code": 53,
+      "wilaya": "In Salah",
+      "tarif_stop_desk_sans_compte": 1200,
+      "tarif_domicile_sans_compte": 1500,
+      "tarif_retour": 350,
+      "double_star": true
+    },
+    {
+      "code": 54,
+      "wilaya": "Tamanrasset",
+      "tarif_stop_desk_sans_compte": 1600,
+      "tarif_domicile_sans_compte": 2000,
+      "tarif_retour": 400,
+      "double_star": true
+    },
+    {
+      "code": 37,
+      "wilaya": "Tindouf",
+      "tarif_stop_desk_sans_compte": 1600,
+      "tarif_domicile_sans_compte": 2000,
+      "tarif_retour": 400,
+      "double_star": true
+    },
+    {
+      "code": 33,
+      "wilaya": "Illizi",
+      "tarif_stop_desk_sans_compte": 2000,
+      "tarif_domicile_sans_compte": 2200,
+      "tarif_retour": 400,
+      "double_star": true
+    },
+    {
+      "code": 50,
+      "wilaya": "Bordj Badji Mokhtar",
+      "tarif_stop_desk_sans_compte": 2000,
+      "tarif_domicile_sans_compte": 2200,
+      "tarif_retour": 400,
+      "double_star": true
+    },
+    {
+      "code": 46,
+      "wilaya": "In Guezzam",
+      "tarif_stop_desk_sans_compte": 2000,
+      "tarif_domicile_sans_compte": 2200,
+      "tarif_retour": 400,
+      "double_star": true
+    },
+    {
+      "code": 56,
+      "wilaya": "Djanet",
+      "tarif_stop_desk_sans_compte": 2000,
+      "tarif_domicile_sans_compte": 2200,
+      "tarif_retour": 400,
+      "double_star": true
+    }
+  ]
+}  

@@ -1,0 +1,876 @@
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  Scissors,
+  Hand,
+  Flower2,
+  HeartHandshake,
+  Heart,
+  Shirt,
+  Package,
+  MapPin,
+  Users,
+  Gem,
+  ShieldCheck,
+} from "lucide-react";
+import { Button, Spinner } from "@/components/ui";
+import { ProductCard } from "@/components/product/ProductCard";
+import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
+import { useLayoutContext } from "@/hooks/useLayoutContext";
+import { useAsync } from "@/hooks/useAsync";
+import { getFeaturedProducts, getNewProducts } from "@/api";
+import { cn } from "@/lib/cn";
+import heroImage from "../assets/hero2.png";
+import maibiHero from "../assets/hero2.png";
+import ourStoryImage from "../assets/our-story.png";
+import { FeatureItem } from "@/components/ui/FeatureItem";
+
+const MARQUEE_ITEMS: Array<[string, string, string]> = [
+  ["✶", "Hand-embroidered", "var(--color-gold)"],
+  ["♡", "Limited edition", "var(--color-pink-500)"],
+  ["◇", "Slow fashion", "var(--color-ink-400)"],
+  ["✶", "Made in Algeria", "var(--color-gold)"],
+  ["♡", "Custom orders", "var(--color-pink-500)"],
+  ["◇", "One of a kind", "var(--color-ink-400)"],
+  ["✶", "Algerian artisans", "var(--color-gold)"],
+  ["◇", "Wearable art", "var(--color-ink-400)"],
+];
+
+function SectionTitle({
+  children,
+  sub,
+  action,
+  onAction,
+  isMobile,
+}: {
+  children: React.ReactNode;
+  sub?: string;
+  action?: string;
+  onAction?: () => void;
+  isMobile: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-baseline justify-between",
+        isMobile ? "mb-5" : "mb-7",
+      )}
+    >
+      <div>
+        <h2
+          className={cn(
+            "font-display font-semibold text-ink-900 m-0 mb-1",
+            isMobile ? "text-[26px]" : "text-4xl",
+          )}
+        >
+          {children}
+        </h2>
+        {sub && <p className="text-ink-500 text-[13px] m-0">{sub}</p>}
+      </div>
+      {action && (
+        <button
+          type="button"
+          onClick={onAction}
+          className={cn(
+            "border-0 bg-transparent cursor-pointer text-pink-600 font-semibold flex items-center gap-1.5 flex-none",
+            isMobile ? "text-[13px]" : "text-sm",
+          )}
+        >
+          {action} <ArrowRight size={16} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function Home() {
+  const navigate = useNavigate();
+  const { isMobile } = useLayoutContext();
+  const px = isMobile ? "px-4" : "px-8";
+
+  const featured = useAsync((signal) => getFeaturedProducts(4, signal), []);
+  const newArrivals = useAsync((signal) => getNewProducts(4, signal), []);
+
+  return (
+    <main className={isMobile ? "pb-20" : ""}>
+      {/* ══════════════════════════════════════════
+           HERO — MOBILE  (stacked: photo → content)
+          ══════════════════════════════════════════ */}
+      {isMobile && (
+        <section
+          className="w-full"
+          style={{
+            background: "linear-gradient(180deg, #fef1f8 0%, #fdf4f9 100%)",
+          }}
+        >
+          {/* Photo — full width, top of screen, no padding */}
+          <div
+            className="relative w-full"
+            style={{ height: "52vw", minHeight: 210, maxHeight: 320 }}
+          >
+            <img
+              src={heroImage}
+              alt="Maibi handmade fashion"
+              className="absolute inset-0 w-full h-full object-cover object-top"
+            />
+            {/* bottom fade into the pink content area */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+              style={{
+                background: "linear-gradient(to bottom, transparent, #fef1f8)",
+              }}
+            />
+          </div>
+
+          {/* Content area */}
+          <div className="px-5 pt-1 pb-6">
+            {/* MADE IN ALGERIA pill — sits just below the photo */}
+            {/* <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-[7px] shadow-sm mb-5">
+              <span className="grid place-items-center size-[20px] rounded-full bg-pink-100">
+                <Flower2
+                  className="size-[10px] text-pink-500"
+                  strokeWidth={2.4}
+                />
+              </span>
+              <span className="text-[11px] font-bold tracking-[0.14em] text-pink-600">
+                MADE IN ALGERIA
+              </span>
+            </div> */}
+
+            {/* Heading */}
+            <h1 className="m-0 font-display tracking-tight">
+              <span
+                className="block font-bold text-pink-500"
+                style={{ fontSize: 46, lineHeight: 0.95 }}
+              >
+                Maibi,
+              </span>
+              <span
+                className="block font-medium text-ink-900"
+                style={{ fontSize: 36, lineHeight: 1.05 }}
+              >
+                crafted with soul.
+              </span>
+            </h1>
+
+            {/* accent */}
+            <div className="mt-4 flex items-center gap-2">
+              <div className="h-[2.5px] w-10 rounded-full bg-pink-400" />
+              <span className="text-pink-400 text-[11px]">✦</span>
+            </div>
+
+            {/* Subtext */}
+            <p className="mt-4 text-[14px] leading-[1.7] text-ink-500 m-0">
+              Handmade fashion by Algerian artisans.
+              <br />
+              Limited pieces. Timeless details. Made to be unique.
+            </p>
+
+            {/* CTA buttons */}
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate("/shop")}
+                className="inline-flex items-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold text-[14px] pl-6 pr-2.5 py-3 transition-colors shadow-brand"
+              >
+                Shop the drop
+                <span className="grid place-items-center size-7 rounded-full bg-white/20">
+                  <ArrowRight className="size-[15px]" />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/custom-order")}
+                className="inline-flex items-center gap-2 rounded-full border border-pink-300 text-pink-600 font-semibold text-[14px] px-5 py-3 transition-colors bg-white/70"
+              >
+                <Scissors className="size-[13px]" />
+                Request custom piece
+              </button>
+            </div>
+
+            {/* Social proof */}
+            <div className="mt-6 flex items-center gap-3">
+              <div className="flex -space-x-2.5">
+                {[
+                  "from-pink-200 to-pink-400",
+                  "from-gold/60 to-rose-red",
+                  "from-pink-300 to-pink-600",
+                ].map((g, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "size-8 rounded-full border-2 border-white bg-gradient-to-br",
+                      g,
+                    )}
+                  />
+                ))}
+              </div>
+              <p className="text-[13px] text-ink-500 flex items-center gap-1.5 m-0">
+                Loved by <span className="font-bold text-ink-900">1350+</span>{" "}
+                women
+                <Heart className="size-3.5 fill-pink-500 text-pink-500" />
+              </p>
+            </div>
+
+            {/* Bottom features — 2 col grid */}
+            <div className="mt-6 rounded-[18px] bg-white/70 backdrop-blur-sm px-4 py-4 shadow-sm ring-1 ring-pink-100/60">
+              <div className="grid grid-cols-2 gap-4">
+                <FeatureItem
+                  icon={<HeartHandshake strokeWidth={1.8} />}
+                  title="Handmade"
+                  description="crafted with love"
+                />
+                <FeatureItem
+                  icon={<Flower2 strokeWidth={1.8} />}
+                  title="Cultural heritage"
+                  description="in every detail"
+                />
+                <FeatureItem
+                  icon={<Shirt strokeWidth={1.8} />}
+                  title="Limited pieces"
+                  description="never mass produced"
+                />
+                <FeatureItem
+                  icon={<Package strokeWidth={1.8} />}
+                  title="Carefully packaged"
+                  description="delivered with care"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════
+           HERO — DESKTOP  (full-bleed background)
+          ══════════════════════════════════════════ */}
+      {!isMobile && (
+        <section className="max-w-full mx-auto px-6">
+          <div
+            className="relative overflow-hidden rounded-[28px]"
+            style={{ minHeight: 520 }}
+          >
+            {/* Full-bleed background photo — maibi-hero.png already has the limited edition stamp */}
+            <img
+              src={maibiHero}
+              alt="Maibi handmade fashion"
+              className="absolute inset-0 h-[720px] w-[1597px] object-cover object-center"
+            />
+
+            {/* Left-to-right gradient: opaque cream → transparent, keeps leaves visible on far left */}
+            <div
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(254,241,248,0.65) 0%, rgba(254,241,248,0.90) 35%, rgba(254,241,248,0.60) 48%, rgba(254,241,248,0.10) 65%, transparent 80%)",
+              }}
+            />
+
+            {/* Content — sits over the gradient */}
+            <div
+              className="relative z-20 flex flex-col justify-center px-14 py-10"
+              style={{ maxWidth: "56%" }}
+            >
+              {/* MADE IN ALGERIA pill */}
+              {/* <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/90 px-4 py-[7px] shadow-sm mb-6">
+                <span className="grid place-items-center size-[22px] rounded-full bg-pink-100">
+                  <Flower2 className="size-[11px] text-pink-500" strokeWidth={2.4} />
+                </span>
+                <span className="text-[11.5px] font-bold tracking-[0.15em] text-pink-600">
+                  MADE IN ALGERIA
+                </span>
+              </div> */}
+
+              {/* Heading */}
+              <h1 className="m-0 font-display tracking-tight">
+                <span
+                  className="block font-bold text-pink-500"
+                  style={{
+                    fontSize: "clamp(52px, 6.5vw, 75px)",
+                    lineHeight: 0.92,
+                  }}
+                >
+                  Maibi,
+                </span>
+                <span
+                  className="block font-medium text-ink-900"
+                  style={{
+                    fontSize: "clamp(38px, 4.8vw, 66px)",
+                    lineHeight: 1.0,
+                  }}
+                >
+                  crafted with soul.
+                </span>
+              </h1>
+
+              {/* accent */}
+              <div className="mt-5 flex items-center gap-2">
+                <div className="h-[2.5px] w-12 rounded-full bg-pink-400" />
+                <span className="text-pink-400 text-[10px]">✦</span>
+              </div>
+
+              {/* Subtext */}
+              <p className="mt-5 text-[15.5px] leading-[1.7] text-ink-600 max-w-[400px]">
+                Handmade fashion by Algerian artisans.
+                <br />
+                Limited pieces. Timeless details. Made to be unique.
+              </p>
+
+              {/* CTA buttons */}
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/shop")}
+                  className="inline-flex items-center gap-3 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold text-[15px] pl-7 pr-3 py-3.5 transition-colors shadow-brand"
+                >
+                  Shop the drop
+                  <span className="grid place-items-center size-5 rounded-full bg-white/20">
+                    <ArrowRight className="size-[17px]" />
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/custom-order")}
+                  className="inline-flex items-center gap-2 rounded-full border border-pink-300 hover:bg-pink-50 text-pink-600 font-semibold text-[15px] px-6 py-3.5 transition-colors bg-white/60"
+                >
+                  <Scissors className="size-[17px]" />
+                  Request custom piece
+                </button>
+              </div>
+
+              {/* Social proof */}
+              <div className="mt-5 flex items-center gap-3">
+                <div className="flex -space-x-2.5">
+                  {[
+                    "from-pink-200 to-pink-400",
+                    "from-gold/60 to-rose-red",
+                    "from-pink-300 to-pink-600",
+                  ].map((g, i) => (
+                    <span
+                      key={i}
+                      className={cn(
+                        "size-8 rounded-full border-[2px] border-white bg-gradient-to-br",
+                        g,
+                      )}
+                    />
+                  ))}
+                </div>
+                <p className="text-[13.5px] text-ink-600 flex items-center gap-1.5 m-0">
+                  Loved by <span className="font-bold text-ink-900">1350+</span>{" "}
+                  women
+                  <Heart className="size-3.5 fill-pink-500 text-pink-500" />
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom features bar — pinned to the bottom of the card */}
+            <div className="absolute bottom-0 inset-x-0 z-20">
+              <div className="mx-5 mb-6 rounded-[20px] border border-pink-200/60 bg-white/80 backdrop-blur-sm px-8 py-5 shadow-sm ring-1 ring-pink-100/60">
+                <div className="grid grid-cols-4 divide-x divide-pink-200/60">
+                  <div className="pr-6 pl-2">
+                    <FeatureItem
+                      icon={<HeartHandshake strokeWidth={1.8} />}
+                      title="Handmade"
+                      description="crafted with love"
+                    />
+                  </div>
+                  <div className="px-6">
+                    <FeatureItem
+                      icon={<Flower2 strokeWidth={1.8} />}
+                      title="Cultural heritage"
+                      description="in every detail"
+                    />
+                  </div>
+                  <div className="px-6">
+                    <FeatureItem
+                      icon={<Shirt strokeWidth={1.8} />}
+                      title="Limited pieces"
+                      description="never mass produced"
+                    />
+                  </div>
+                  <div className="pl-6 pr-2">
+                    <FeatureItem
+                      icon={<Package strokeWidth={1.8} />}
+                      title="Carefully packaged"
+                      description="delivered with care"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Scrolling strip ── */}
+      <section
+        className={cn(
+          "overflow-hidden border-y border-dashed border-pink-200 bg-pink-50 py-3.5",
+          isMobile ? "mt-6" : "mt-9",
+        )}
+      >
+        <div className="marquee-track flex w-max whitespace-nowrap">
+          {[0, 1].map((rep) => (
+            <div key={rep} className="flex items-center">
+              {MARQUEE_ITEMS.map(([ic, label, col], i) => (
+                <span key={i} className="inline-flex items-center gap-2.5 px-8">
+                  <span style={{ color: col, fontSize: 14 }}>{ic}</span>
+                  <span
+                    className={cn(
+                      "font-semibold text-ink-700 tracking-[0.02em]",
+                      isMobile ? "text-[13px]" : "text-sm",
+                    )}
+                  >
+                    {label}
+                  </span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Featured Pieces ── */}
+      <section
+        className={cn(
+          "max-w-[1240px] mx-auto",
+          px,
+          isMobile ? "pt-10" : "pt-18",
+        )}
+      >
+        <SectionTitle
+          sub="Our most-loved pieces this season"
+          action="View all"
+          onAction={() => navigate("/shop")}
+          isMobile={isMobile}
+        >
+          Featured pieces
+        </SectionTitle>
+        {featured.loading ? (
+          <Spinner />
+        ) : (
+          <div
+            className={cn(
+              "grid",
+              isMobile ? "grid-cols-2 gap-3.5" : "grid-cols-4 gap-6",
+            )}
+          >
+            {(featured.data?.items ?? []).slice(0, 4).map((p) => (
+              <ProductCard key={p.id} product={p} isMobile={isMobile} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── Our Story Divider ── */}
+      <div
+        className={cn(
+          "flex items-center justify-center",
+          isMobile ? "mt-14 mx-4" : "mt-24 mx-8",
+        )}
+      >
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-pink-200 to-pink-300/60" />
+        <div className="mx-5 flex items-center gap-3 rounded-full border border-pink-200 bg-white px-5 py-2.5 shadow-sm">
+          <Gem
+            className={cn("text-pink-400 flex-none", isMobile ? "size-3.5" : "size-4")}
+            strokeWidth={1.8}
+          />
+          <span
+            className={cn(
+              "font-display font-semibold tracking-wide text-pink-600",
+              isMobile ? "text-[15px]" : "text-[17px]",
+            )}
+          >
+            Our Story
+          </span>
+          <span
+            className={cn("text-pink-300 select-none", isMobile ? "text-[10px]" : "text-xs")}
+          >
+            ✦
+          </span>
+        </div>
+        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-pink-200 to-pink-300/60" />
+      </div>
+
+      {/* ── Our Story ── */}
+      <section
+        id="our-story"
+        className={cn(
+          "max-w-[1240px] mx-auto",
+          px,
+          isMobile ? "mt-7" : "mt-10",
+        )}
+      >
+        {isMobile ? (
+          /* ── MOBILE STORY ── */
+          <div
+            className="rounded-[24px] overflow-hidden"
+            style={{
+              background: "linear-gradient(180deg, #1a0d12 0%, #3d1228 100%)",
+            }}
+          >
+            {/* Photo */}
+            <div className="relative w-full" style={{ height: 280 }}>
+              <img
+                src={ourStoryImage}
+                alt="Algerian artisan embroidery"
+                className="absolute inset-0 w-full h-full object-cover object-top"
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, transparent 40%, #1a0d12 100%)",
+                }}
+              />
+              {/* floating quote */}
+              <div className="absolute bottom-5 inset-x-5 bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3.5 border border-white/15">
+                <p className="font-display text-white text-[13.5px] italic leading-relaxed m-0">
+                  "Each stitch is a word. Each garment is a story."
+                </p>
+                <p className="text-white/55 text-[11px] font-semibold tracking-widest uppercase mt-1.5 m-0">
+                  Maibi artisans, Algeria
+                </p>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="px-5 pt-6 pb-7">
+              <div className="inline-flex items-center gap-2 mb-4 rounded-full px-3.5 py-1.5 bg-pink-500/20 border border-pink-400/30">
+                <Gem className="size-3.5 text-pink-300" strokeWidth={1.8} />
+                <span className="text-[11px] font-bold tracking-[0.12em] text-pink-300 uppercase">
+                  Our Story
+                </span>
+              </div>
+
+              <h2 className="font-display font-semibold text-white m-0 mb-4 leading-[1.1] text-[28px]">
+                Craft handed down
+                <br />
+                through generations
+              </h2>
+
+              <p className="text-white/65 text-[13.5px] leading-[1.8] m-0 mb-5">
+                Maibi was born from a love of Algerian embroidery — passed from
+                grandmother to granddaughter in Algeria. Every piece is
+                hand-stitched by women artisans who have spent years mastering
+                the craft.
+              </p>
+
+              {/* Stats row */}
+              <div className="flex gap-5 mb-6 pb-5 border-b border-white/10">
+                {[
+                  ["5+", "Artisans", <Users key="u" className="size-3.5" />],
+                  ["100+", "Pieces", <Gem key="g" className="size-3.5" />],
+                  ["3", "Cities", <MapPin key="m" className="size-3.5" />],
+                ].map(([n, l, icon]) => (
+                  <div key={String(l)} className="flex-1">
+                    <div className="font-display font-bold text-pink-400 text-[22px] leading-none mb-0.5">
+                      {n}
+                    </div>
+                    <div className="flex items-center gap-1 text-white/45 text-[11px] font-semibold uppercase tracking-wider">
+                      {icon}
+                      {l}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate("/shop")}
+                className="w-full inline-flex items-center justify-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-500 text-white font-semibold text-[14px] py-3.5 transition-colors"
+              >
+                Discover the collection
+                <ArrowRight className="size-[15px]" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* ── DESKTOP STORY ── */
+          <div
+            className="relative grid grid-cols-[1fr_1fr] rounded-[28px] overflow-hidden min-h-[540px]"
+            style={{
+              background:
+                "linear-gradient(135deg, #1a0d12 0%, #3d1228 60%, #5c1a3a 100%)",
+            }}
+          >
+            {/* LEFT — photo with overlaid quote */}
+            <div className="relative overflow-hidden">
+              <img
+                src={ourStoryImage}
+                alt="Algerian artisan embroidery"
+                className="absolute inset-0 w-full h-full object-cover object-center"
+              />
+              {/* right-edge blend */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to right, transparent 50%, #1a0d12 100%)",
+                }}
+              />
+              {/* bottom-to-top dark vignette */}
+              <div
+                className="absolute inset-x-0 bottom-0 h-48"
+                style={{
+                  background:
+                    "linear-gradient(to top, rgba(26,13,18,0.85), transparent)",
+                }}
+              />
+
+              {/* Quote card at bottom */}
+              <div className="absolute bottom-8 left-8 right-0 pr-4">
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-4 border border-white/15 max-w-[320px]">
+                  <div className="text-pink-300 text-xl mb-2 leading-none">
+                    "
+                  </div>
+                  <p className="font-display text-white text-[16px] italic leading-relaxed m-0">
+                    Each stitch is a word. Each garment is a story told with
+                    thread.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2.5">
+                    <div className="size-7 rounded-full bg-pink-500/30 border border-pink-400/40 grid place-items-center">
+                      <Hand
+                        className="size-3.5 text-pink-300"
+                        strokeWidth={1.8}
+                      />
+                    </div>
+                    <span className="text-white/55 text-[11.5px] font-semibold tracking-[0.08em] uppercase">
+                      Maibi artisans, Algeria
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT — content */}
+            <div className="relative flex flex-col justify-center px-14 py-14">
+              {/* faint script watermark */}
+              <span className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 font-script text-white/[0.04] select-none leading-none text-[160px]">
+                Maibi
+              </span>
+
+              <div className="relative z-10 flex flex-col gap-6">
+                {/* label */}
+                <div className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 bg-pink-500/20 border border-pink-400/30">
+                  <Gem className="size-3.5 text-pink-300" strokeWidth={1.8} />
+                  <span className="text-[11px] font-bold tracking-[0.14em] text-pink-300 uppercase">
+                    Our Story
+                  </span>
+                </div>
+
+                {/* heading */}
+                <h2 className="font-display font-semibold text-white m-0 text-[40px] leading-[1.08]">
+                  Craft handed down
+                  <br />
+                  through generations
+                </h2>
+
+                {/* body */}
+                <p className="text-white/65 text-[15px] leading-[1.85] m-0">
+                  Maibi was born from a love of Algerian embroidery — the kind
+                  passed from grandmother to granddaughter in Algeria, Every
+                  piece in our collection is hand-stitched by women artisans who
+                  have spent years mastering the craft.
+                </p>
+
+                {/* value props */}
+                <div className="flex flex-col gap-3">
+                  {[
+                    {
+                      icon: (
+                        <ShieldCheck className="size-4" strokeWidth={1.8} />
+                      ),
+                      text: "Limited runs — slow, intentional, never mass-produced",
+                    },
+                    {
+                      icon: <MapPin className="size-4" strokeWidth={1.8} />,
+                      text: "Rooted in 3 Algerian cities, each with its own embroidery tradition",
+                    },
+                    {
+                      icon: <Users className="size-4" strokeWidth={1.8} />,
+                      text: "5+ women artisans, 100+ one-of-a-kind pieces and counting",
+                    },
+                  ].map(({ icon, text }) => (
+                    <div key={text} className="flex items-start gap-3">
+                      <span className="mt-0.5 grid place-items-center size-7 rounded-lg bg-pink-500/20 text-pink-300 shrink-0 border border-pink-400/25">
+                        {icon}
+                      </span>
+                      <p className="text-white/70 text-[14px] leading-[1.6] m-0">
+                        {text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Stats */}
+                <div className="flex gap-8 py-5 border-t border-white/10">
+                  {[
+                    ["5+", "Artisans", <Users key="u" className="size-3.5" />],
+                    [
+                      "100+",
+                      "Pieces made",
+                      <Gem key="g" className="size-3.5" />,
+                    ],
+                    ["3", "Cities", <MapPin key="m" className="size-3.5" />],
+                  ].map(([n, l, icon]) => (
+                    <div key={String(l)}>
+                      <div className="font-display font-bold text-pink-400 text-[28px] leading-none mb-1">
+                        {n}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-white/40 text-[11px] font-semibold uppercase tracking-wider">
+                        {icon}
+                        {l}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/shop")}
+                    className="inline-flex items-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-500 text-white font-semibold text-[15px] pl-7 pr-5 py-3.5 transition-colors"
+                  >
+                    Discover the collection
+                    <ArrowRight className="size-[16px]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/custom-order")}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 hover:border-white/40 text-white/70 hover:text-white font-semibold text-[14px] px-6 py-3.5 transition-colors"
+                  >
+                    Custom order
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ── New Arrivals ── */}
+      <section
+        className={cn(
+          "max-w-[1240px] mx-auto",
+          px,
+          isMobile ? "pt-12" : "pt-22",
+        )}
+      >
+        <SectionTitle
+          sub="Fresh from our artisans — just arrived"
+          action="Shop all"
+          onAction={() => navigate("/shop")}
+          isMobile={isMobile}
+        >
+          New arrivals
+        </SectionTitle>
+        {newArrivals.loading ? (
+          <Spinner />
+        ) : (
+          <div
+            className={cn(
+              "grid",
+              isMobile ? "grid-cols-2 gap-3.5" : "grid-cols-4 gap-6",
+            )}
+          >
+            {(newArrivals.data?.items ?? []).map((p) => (
+              <ProductCard key={p.id} product={p} isMobile={isMobile} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── Custom Order Banner ── */}
+      <section
+        className={cn(
+          "text-center",
+          isMobile ? "mt-12 px-5 py-12" : "mt-22 px-16 py-20",
+        )}
+        style={{
+          background:
+            "linear-gradient(120deg, #2A2123 0%, #4A1535 40%, #8A1550 100%)",
+        }}
+      >
+        <div
+          className={cn(
+            "max-w-[640px] mx-auto flex flex-col items-center",
+            isMobile ? "gap-4" : "gap-5.5",
+          )}
+        >
+          <div className="w-14 h-14 rounded-full bg-pink-400/20 border-[1.5px] border-pink-400/40 grid place-items-center text-pink-300">
+            <Scissors size={20} strokeWidth={1.8} />
+          </div>
+          <div
+            className="font-script text-pink-300"
+            style={{ fontSize: isMobile ? 18 : 22 }}
+          >
+            Bespoke service
+          </div>
+          <h2
+            className={cn(
+              "font-display text-white font-semibold leading-[1.08] m-0",
+              isMobile ? "text-3xl" : "text-5xl",
+            )}
+          >
+            Your vision,
+            <br />
+            crafted by hand
+          </h2>
+          <p
+            className={cn(
+              "text-white/65 leading-relaxed m-0 max-w-[500px]",
+              isMobile ? "text-sm" : "text-[17px]",
+            )}
+          >
+            Can't find exactly what you're looking for? Send us a photo and
+            describe your dream piece — our artisans will bring it to life,
+            stitch by stitch.
+          </p>
+          <div className="flex gap-3 flex-wrap justify-center">
+            <Button
+              size={isMobile ? "md" : "lg"}
+              onClick={() => navigate("/custom-order")}
+              iconRight={<ArrowRight size={18} />}
+            >
+              Start your custom order
+            </Button>
+            <Button
+              size={isMobile ? "md" : "lg"}
+              variant="ghost"
+              className="text-white/60 border-[1.5px] border-white/20"
+              onClick={() => navigate("/shop")}
+            >
+              Browse ready-made
+            </Button>
+          </div>
+          <div className="flex gap-7 mt-2">
+            {[
+              ["No upfront payment", "Pay after quote"],
+              ["48h response", "Fast turnaround"],
+              ["WhatsApp support", "Direct with artisans"],
+            ].map(([t, s]) => (
+              <div key={t} className="text-center">
+                <div
+                  className={cn(
+                    "font-bold text-white/85",
+                    isMobile ? "text-xs" : "text-[13px]",
+                  )}
+                >
+                  {t}
+                </div>
+                <div className="text-[11px] text-white/45 mt-0.5">{s}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Customer Reviews ── */}
+      <ReviewsCarousel isMobile={isMobile} />
+    </main>
+  );
+}

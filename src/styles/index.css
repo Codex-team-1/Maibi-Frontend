@@ -1,0 +1,195 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   Maibi design tokens — ported verbatim from the claude_design project
+   (tokens/colors.css, typography.css, spacing.css). Registered with Tailwind v4
+   via @theme so utilities like bg-pink-400, font-display, rounded-lg, shadow-brand
+   map straight onto the brand tokens.
+   ========================================================================== */
+@theme {
+  /* ===== Brand pink scale ===== */
+  --color-pink-50: #fef1f8;
+  --color-pink-100: #fdddef;
+  --color-pink-200: #fbbbde;
+  --color-pink-300: #f993c8;
+  --color-pink-400: #f45dab; /* core brand pink */
+  --color-pink-500: #ec3d96;
+  --color-pink-600: #d41f7c;
+  --color-pink-700: #a81562;
+
+  /* ===== Warm neutrals ===== */
+  --color-white: #ffffff;
+  --color-warm-50: #faf8f8; /* warm white — app background */
+  --color-warm-100: #f4efef;
+  --color-warm-200: #e9e1e2;
+  --color-warm-300: #d7cbcc;
+  --color-ink-400: #a89a9c;
+  --color-ink-500: #7d6e70;
+  --color-ink-700: #4a3e40;
+  --color-ink-900: #2a2123; /* near-black warm ink */
+
+  /* ===== Supporting accents ===== */
+  --color-gold: #d9a45b; /* artisanal thread / highlight */
+  --color-sage: #8fa98c; /* success */
+  --color-rose-red: #d6455a; /* error / sale */
+
+  /* ===== Font families ===== */
+  --font-script: 'Yellowtail', cursive;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'Quicksand', 'Segoe UI', sans-serif;
+
+  /* ===== Type scale ===== */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+  --text-5xl: 4rem;
+
+  /* ===== Corner radii — rounded & delicate ===== */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  /* ===== Shadows — soft, warm, low-contrast ===== */
+  --shadow-sm: 0 1px 3px rgba(42, 33, 35, 0.06);
+  --shadow-md: 0 6px 18px rgba(42, 33, 35, 0.08);
+  --shadow-lg: 0 14px 40px rgba(42, 33, 35, 0.1);
+  --shadow-brand: 0 8px 24px rgba(244, 93, 171, 0.3);
+
+  /* ===== Motion ===== */
+  --ease-soft: cubic-bezier(0.34, 1.2, 0.4, 1);
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* ===== Marquee / hero / spinner animations ===== */
+  --animate-marquee: marquee 22s linear infinite;
+  --animate-hero-progress: heroProgress 5s linear forwards;
+  --animate-spin-soft: spin 0.7s linear infinite;
+}
+
+/* ============================================================================
+   Raw CSS custom properties — semantic aliases + values that need to be read
+   from inline contexts (the dashed "stitch" border, durations). Kept on :root
+   so they're available everywhere alongside the Tailwind theme.
+   ========================================================================== */
+:root {
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.16em;
+
+  --stitch: 2px dashed var(--color-pink-300);
+  --stitch-soft: 1.5px dashed var(--color-warm-300);
+
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+}
+
+/* ===== Keyframes ===== */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes heroProgress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Base ===== */
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  background: var(--color-warm-50);
+  font-family: var(--font-ui);
+  color: var(--color-ink-700);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-warm-300);
+  border-radius: 999px;
+}
+
+/* Dual-thumb range input (price filter) */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--color-warm-200);
+  border-radius: 999px;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-pink-400);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-pink-400);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Hide scrollbar utility (horizontal scroll rows) */
+.hide-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Marquee track (pauses on hover) */
+.marquee-track {
+  animation: var(--animate-marquee);
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* The signature dashed-stitch border, as a utility */
+.border-stitch {
+  border: var(--stitch);
+}
+.border-stitch-soft {
+  border: var(--stitch-soft);
+}
