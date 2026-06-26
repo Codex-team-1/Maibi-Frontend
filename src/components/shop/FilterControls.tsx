@@ -108,7 +108,6 @@ export interface FilterContentProps {
 
 export function FilterContent({
   categories, cats, toggleCat,
-  priceMin, priceMax, setPriceMin, setPriceMax,
   badgeLabels, toggleBadgeLabel,
   inStockOnly, toggleInStock,
 }: FilterContentProps) {

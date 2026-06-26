@@ -57,3 +57,5 @@ export interface PaymentMethod {
 }
 
 export type PaymentMethodId = 'cod' | 'cib' | 'dahabia' | 'baridimob';
+
+export type BadgeVariant = 'brand' | 'soft' | 'neutral' | 'gold' | 'sale';

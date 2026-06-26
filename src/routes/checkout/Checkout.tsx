@@ -27,9 +27,7 @@ import { createOrder } from '@/api';
 import { ApiError } from '@/lib/api';
 import { OrderSummary } from './OrderSummary';
 import {
-  cardSchema,
   shippingSchema,
-  type CardForm,
   type ShippingForm,
 } from './schema';
 import shippingRates from '@/data/world_express_shipping_rates.json';
@@ -70,7 +68,6 @@ export function Checkout() {
   const [step, setStep] = useState(1);
   const [shipping, setShipping] = useState<ShippingForm | null>(null);
   const [method, setMethod] = useState<PaymentMethodId>('cod');
-  const [card, setCard] = useState<CardForm | null>(null);
   const [placing, setPlacing] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [placedOrder, setPlacedOrder] = useState<OrderDTO | null>(null);
@@ -106,12 +103,6 @@ export function Checkout() {
   const selectedPayment =
     PAYMENT_METHODS.find((m) => m.id === method) ?? PAYMENT_METHODS[0];
 
-  const cardForm = useForm<CardForm>({
-    resolver: zodResolver(cardSchema),
-    defaultValues: { cardNumber: '', cardName: '', expiry: '', cvv: '' },
-    mode: 'onTouched',
-  });
-
   if (items.length === 0 && step !== 4) return <Navigate to="/shop" replace />;
 
   const onShippingValid = (data: ShippingForm) => {
@@ -120,7 +111,6 @@ export function Checkout() {
   };
 
   const goToReview = async () => {
-    setCard(null);
     setStep(3);
   };
 
