@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useCart, selectCartCount } from '@/store/useCart';
 import { useWishlist, selectWishCount } from '@/store/useWishlist';
 import { useUI } from '@/store/useUI';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 interface NavItem {
@@ -17,16 +18,17 @@ interface NavItem {
 export function MobileBottomNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { t } = useI18n();
   const cartCount = useCart(selectCartCount);
   const wishCount = useWishlist(selectWishCount);
   const openCart = useUI((s) => s.openCart);
 
   const items: NavItem[] = [
-    { id: 'home', to: '/', icon: Home, label: 'Home' },
-    { id: 'shop', to: '/shop', icon: LayoutGrid, label: 'Shop' },
-    { id: 'wishlist', to: '/wishlist', icon: Heart, label: 'Saved', badge: wishCount },
-    { id: 'custom', to: '/custom-order', icon: Scissors, label: 'Custom' },
-    { id: 'cart', to: null, icon: ShoppingBag, label: 'Cart', badge: cartCount },
+    { id: 'home', to: '/', icon: Home, label: t('bottomNav.home') },
+    { id: 'shop', to: '/shop', icon: LayoutGrid, label: t('bottomNav.shop') },
+    { id: 'wishlist', to: '/wishlist', icon: Heart, label: t('bottomNav.saved'), badge: wishCount },
+    { id: 'custom', to: '/custom-order', icon: Scissors, label: t('bottomNav.custom') },
+    { id: 'cart', to: null, icon: ShoppingBag, label: t('bottomNav.cart'), badge: cartCount },
   ];
 
   const isActive = (item: NavItem) =>

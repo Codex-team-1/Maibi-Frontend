@@ -1,29 +1,31 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook } from 'lucide-react';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
-const COLS: Array<[string, Array<{ label: string; to: string }>]> = [
+const COLS: Array<[TranslationKey, Array<{ labelKey: TranslationKey; to: string }>]> = [
   [
-    'Shop',
+    'footer.shop',
     [
-      { label: 'New in', to: '/shop?filter=new' },
-      { label: 'Dresses', to: '/shop?q=dress' },
-      { label: 'Robes', to: '/shop?q=robe' },
-      { label: 'Abayas', to: '/shop?q=abaya' },
+      { labelKey: 'footer.newIn', to: '/shop?filter=new' },
+      { labelKey: 'footer.dresses', to: '/shop?q=dress' },
+      { labelKey: 'footer.robes', to: '/shop?q=robe' },
+      { labelKey: 'footer.abayas', to: '/shop?q=abaya' },
     ],
   ],
-  ['Services', [{ label: 'Custom order', to: '/custom-order' }]],
+  ['footer.services', [{ labelKey: 'footer.customOrder', to: '/custom-order' }]],
   [
-    'My account',
+    'footer.myAccount',
     [
-      { label: 'Wishlist', to: '/wishlist' },
-      { label: 'My bag', to: '/checkout' },
-      { label: 'Checkout', to: '/checkout' },
+      { labelKey: 'footer.wishlist', to: '/wishlist' },
+      { labelKey: 'footer.myBag', to: '/checkout' },
+      { labelKey: 'footer.checkout', to: '/checkout' },
     ],
   ],
 ];
 
 export function Footer({ isMobile }: { isMobile: boolean }) {
+  const { t } = useI18n();
   return (
     <footer
       className={cn(
@@ -42,8 +44,7 @@ export function Footer({ isMobile }: { isMobile: boolean }) {
         <div className={isMobile ? "col-span-full" : undefined}>
           <div className="font-script text-pink-400 text-4xl">Maibi</div>
           <p className="text-ink-500 text-[13px] leading-relaxed max-w-[240px]">
-            Hand-embroidered, limited-edition clothing made with care by
-            Algerian artisans.
+            {t('footer.tagline')}
           </p>
           <div className="flex gap-2 mt-3">
             {[
@@ -68,19 +69,19 @@ export function Footer({ isMobile }: { isMobile: boolean }) {
           </div>
         </div>
 
-        {COLS.map(([heading, items]) => (
-          <div key={heading}>
+        {COLS.map(([headingKey, items]) => (
+          <div key={headingKey}>
             <div className="font-bold text-ink-900 mb-3 text-xs tracking-[0.08em] uppercase">
-              {heading}
+              {t(headingKey)}
             </div>
             <div className="flex flex-col gap-[9px]">
-              {items.map(({ label, to }) => (
+              {items.map(({ labelKey, to }) => (
                 <Link
-                  key={label}
+                  key={labelKey}
                   to={to}
-                  className="text-ink-500 text-[13px] no-underline text-left font-ui hover:text-pink-500 transition-colors"
+                  className="text-ink-500 text-[13px] no-underline text-start font-ui hover:text-pink-500 transition-colors"
                 >
-                  {label}
+                  {t(labelKey)}
                 </Link>
               ))}
             </div>
@@ -89,7 +90,7 @@ export function Footer({ isMobile }: { isMobile: boolean }) {
       </div>
 
       <div className="border-t border-dashed border-warm-300 px-8 py-4 text-center text-ink-400 text-xs">
-        © 2026 Maibi · Made by{" "}
+        © 2026 Maibi · {t('footer.madeBy')}{" "}
         <a
           href="https://www.instagram.com/craftx.team"
           target="_blank"
@@ -98,7 +99,7 @@ export function Footer({ isMobile }: { isMobile: boolean }) {
         >
           CREAFTX
         </a>{" "}
-        in Algeria
+        {t('footer.inAlgeria')}
       </div>
     </footer>
   );

@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from '@/router';
 import { ConfigProvider } from '@/store/useConfig';
 import { useAuth } from '@/store/useAuth';
+import { LanguageProvider } from '@/i18n';
 import '@/styles/index.css';
 
 function App() {
@@ -13,9 +14,11 @@ function App() {
   }, []);
 
   return (
-    <ConfigProvider>
-      <RouterProvider router={router} />
-    </ConfigProvider>
+    <LanguageProvider>
+      <ConfigProvider>
+        <RouterProvider router={router} />
+      </ConfigProvider>
+    </LanguageProvider>
   );
 }
 

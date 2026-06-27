@@ -2,22 +2,23 @@ import { z } from 'zod';
 import { WILAYAS } from '@/data/products';
 
 /* ── Step 1: Shipping ─────────────────────────────────────────────────────── */
+// Messages are translation keys, resolved via `t()` at the display site.
 export const shippingSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().min(1, 'val.emailRequired').email('val.emailValid'),
+  firstName: z.string().min(1, 'val.firstNameRequired'),
+  lastName: z.string().min(1, 'val.lastNameRequired'),
   phone: z
     .string()
-    .min(1, 'Phone is required')
-    .regex(/[0-9]/, 'Enter a valid phone number'),
-  address: z.string().min(1, 'Street address is required'),
-  city: z.string().min(1, 'City is required'),
+    .min(1, 'val.phoneRequired')
+    .regex(/[0-9]/, 'val.phoneValid'),
+  address: z.string().min(1, 'val.addressRequired'),
+  city: z.string().min(1, 'val.cityRequired'),
   wilaya: z
     .string()
-    .min(1, 'Select a wilaya')
-    .refine((v) => WILAYAS.includes(v), 'Select a valid wilaya'),
+    .min(1, 'val.wilayaSelectShort')
+    .refine((v) => WILAYAS.includes(v), 'val.wilayaValid'),
   shippingType: z.enum(['home', 'desk'], {
-    required_error: 'Select a delivery type',
+    required_error: 'val.deliveryTypeSelect',
   }),
   notes: z.string().optional(),
 });

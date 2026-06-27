@@ -129,6 +129,26 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+button, [role="button"], select {
+  cursor: pointer;
+}
+
+/* ============================================================================
+   RTL / Arabic support. When <html dir="rtl"> the UI + display fonts switch to
+   Tajawal (which has full Arabic glyph coverage), while the Yellowtail script
+   logo stays Latin. The price marquee keeps its LTR direction so the animation
+   still scrolls correctly.
+   ========================================================================== */
+[dir='rtl'] {
+  --font-ui: 'Tajawal', 'Segoe UI', sans-serif;
+  --font-display: 'Tajawal', 'Cormorant Garamond', Georgia, serif;
+}
+[dir='rtl'] body {
+  font-family: var(--font-ui);
+}
+[dir='rtl'] .marquee-track {
+  direction: ltr;
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

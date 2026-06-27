@@ -9,6 +9,12 @@ export interface ProductImage {
   publicId: string;
 }
 
+export interface ProductDiscount {
+  percent: number;
+  activeUntil: string;
+  discountedPrice: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -21,6 +27,8 @@ export interface Product {
   images: ProductImage[];
   sizes: string[];
   colors: string[];
+  rating: { ratingCount: number; ratingAvg: number };
+  discount?: ProductDiscount;
   createdAt: string;
   updatedAt: string;
 }

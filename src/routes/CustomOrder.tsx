@@ -6,10 +6,12 @@ import { useLayoutContext } from '@/hooks/useLayoutContext';
 import { useConfig } from '@/store/useConfig';
 import { createCustomOrder } from '@/api';
 import { ApiError } from '@/lib/api';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
-const STEPS = ['Your photo', 'Size & color', 'Contact'];
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'Custom fit'];
+const STEP_KEYS: TranslationKey[] = ['custom.stepPhoto', 'custom.stepSizeColor', 'custom.stepContact'];
+const CUSTOM_FIT = 'Custom fit';
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', CUSTOM_FIT];
 const GARMENT_TYPES = [
   'Robe de soirée',
   'Kaftan',
@@ -29,6 +31,7 @@ const inputCls =
 export function CustomOrder() {
   const navigate = useNavigate();
   const { isMobile } = useLayoutContext();
+  const { t } = useI18n();
   const { colors: COLOR_PALETTE, wilayas } = useConfig();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -74,7 +77,7 @@ export function CustomOrder() {
   const canNext2 =
     Boolean(size) &&
     colors.length > 0 &&
-    (size !== 'Custom fit' || customSize.trim().length > 0);
+    (size !== CUSTOM_FIT || customSize.trim().length > 0);
   const canSubmit =
     Boolean(contact.name) && Boolean(contact.email) && Boolean(contact.wilaya);
 
@@ -88,7 +91,7 @@ export function CustomOrder() {
       form.append('phone', contact.phone);
       form.append('wilaya', contact.wilaya);
       form.append('garmentType', garmentType);
-      form.append('size', size === 'Custom fit' ? `Custom: ${customSize.trim()}` : size);
+      form.append('size', size === CUSTOM_FIT ? `Custom: ${customSize.trim()}` : size);
       form.append('notes', notes);
       if (budget) form.append('budget', `${budget} DA`);
       // Backend accepts a JSON-encoded color array.
@@ -101,7 +104,7 @@ export function CustomOrder() {
       setSubmitError(
         err instanceof ApiError
           ? err.message
-          : 'Could not send your request. Please try again.',
+          : t('custom.sendError'),
       );
     } finally {
       setSubmitting(false);
@@ -115,12 +118,12 @@ export function CustomOrder() {
         isMobile ? 'mb-7' : 'mb-9',
       )}
     >
-      {STEPS.map((s, i) => {
+      {STEP_KEYS.map((sKey, i) => {
         const n = i + 1;
         const done = step > n;
         const active = step === n;
         return (
-          <Fragment key={s}>
+          <Fragment key={sKey}>
             <div
               className={cn('flex flex-col items-center gap-1.5', done && 'cursor-pointer')}
               onClick={() => done && setStep(n)}
@@ -142,10 +145,10 @@ export function CustomOrder() {
                   done || active ? 'text-pink-600' : 'text-ink-400',
                 )}
               >
-                {s}
+                {t(sKey)}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
+            {i < STEP_KEYS.length - 1 && (
               <div
                 className="h-0.5 mb-5 transition-colors"
                 style={{
@@ -178,23 +181,22 @@ export function CustomOrder() {
             isMobile ? 'text-3xl' : 'text-[40px]',
           )}
         >
-          Request received!
+          {t('custom.requestReceived')}
         </h1>
         <p className="text-ink-700 text-[15px] leading-relaxed mb-7">
-          Thank you, <strong>{contact.name}</strong>. Our artisans will review your
-          request and reach out within 48 hours at <strong>{contact.email}</strong>.
+          {t('custom.requestReceivedBody', { name: contact.name, email: contact.email })}
         </p>
         {photoURL && (
           <div className="w-30 h-[150px] rounded-lg overflow-hidden mx-auto mb-5 border-[3px] border-pink-200">
             <img src={photoURL} alt="Your reference" className="w-full h-full object-cover" />
           </div>
         )}
-        <div className="bg-pink-50 border-stitch rounded-lg px-5 py-4.5 mb-7 text-left">
+        <div className="bg-pink-50 border-stitch rounded-lg px-5 py-4.5 mb-7 text-start">
           {(
             [
-              ['Size', size],
-              ['Colors', colors.join(', ')],
-              ['Notes', notes.slice(0, 60) + (notes.length > 60 ? '…' : '')],
+              [t('product.size'), size],
+              [t('custom.colourPalette'), colors.join(', ')],
+              [t('custom.summaryNotes'), notes.slice(0, 60) + (notes.length > 60 ? '…' : '')],
             ] as const
           )
             .filter(([, v]) => v)
@@ -205,8 +207,8 @@ export function CustomOrder() {
               </div>
             ))}
         </div>
-        <Button onClick={() => navigate('/')} iconRight={<ArrowRight size={18} />}>
-          Back to shop
+        <Button onClick={() => navigate('/')} iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}>
+          {t('common.backToShop')}
         </Button>
       </main>
     );
@@ -224,18 +226,18 @@ export function CustomOrder() {
         onClick={() => navigate('/')}
         className="border-0 bg-transparent cursor-pointer text-ink-500 text-sm flex items-center gap-1 mb-7"
       >
-        <ChevronLeft size={20} strokeWidth={1.8} /> Back to home
+        <ChevronLeft size={20} strokeWidth={1.8} className="rtl:-scale-x-100" /> {t('common.backToHome')}
       </button>
 
       <div className="text-center mb-9">
-        <Badge variant="gold">Bespoke service</Badge>
+        <Badge variant="gold">{t('custom.bespokeService')}</Badge>
         <h1
           className={cn(
             'font-display font-semibold text-ink-900 mt-2.5 mb-2',
             isMobile ? 'text-3xl' : 'text-[42px]',
           )}
         >
-          Custom order
+          {t('custom.title')}
         </h1>
         <p
           className={cn(
@@ -243,8 +245,7 @@ export function CustomOrder() {
             isMobile ? 'text-sm' : 'text-base',
           )}
         >
-          Share your vision — our artisans will craft a one-of-a-kind piece just for
-          you.
+          {t('custom.subtitle')}
         </p>
       </div>
 
@@ -255,11 +256,10 @@ export function CustomOrder() {
         <div className="flex flex-col gap-6">
           <div>
             <div className="font-bold text-[15px] text-ink-900 mb-2">
-              Upload a reference photo
+              {t('custom.uploadTitle')}
             </div>
             <p className="text-ink-500 text-[13px] m-0 mb-3.5">
-              A photo of something you love — a dress, embroidery detail, colour
-              palette, or outfit inspiration.
+              {t('custom.uploadDesc')}
             </p>
             <input
               ref={fileRef}
@@ -290,12 +290,12 @@ export function CustomOrder() {
                 <div className="w-14 h-14 rounded-full bg-pink-100 grid place-items-center mx-auto mb-4 text-pink-500">
                   <Upload size={24} strokeWidth={1.8} />
                 </div>
-                <div className="font-bold text-ink-900 mb-1.5">Drop your photo here</div>
+                <div className="font-bold text-ink-900 mb-1.5">{t('custom.dropPhoto')}</div>
                 <div className="text-[13px] text-ink-500 mb-3.5">
-                  or click to browse · JPG, PNG up to 10MB
+                  {t('custom.orBrowse')}
                 </div>
                 <Button size="sm" variant="secondary">
-                  Choose photo
+                  {t('custom.choosePhoto')}
                 </Button>
               </div>
             ) : (
@@ -311,18 +311,18 @@ export function CustomOrder() {
                     onClick={() => fileRef.current?.click()}
                     className="bg-white/90 border-0 rounded-full px-3.5 py-2 cursor-pointer font-ui font-semibold text-[13px] text-ink-700 backdrop-blur-sm"
                   >
-                    Change
+                    {t('custom.change')}
                   </button>
                   <button
                     type="button"
                     onClick={clearPhoto}
                     className="bg-white/90 border-0 rounded-full px-3.5 py-2 cursor-pointer font-ui font-semibold text-[13px] text-rose-red backdrop-blur-sm"
                   >
-                    Remove
+                    {t('custom.remove')}
                   </button>
                 </div>
-                <div className="absolute bottom-3 left-3">
-                  <Badge variant="soft">Photo uploaded</Badge>
+                <div className="absolute bottom-3 start-3">
+                  <Badge variant="soft">{t('custom.photoUploaded')}</Badge>
                 </div>
               </div>
             )}
@@ -330,17 +330,16 @@ export function CustomOrder() {
 
           <div>
             <div className="font-bold text-[15px] text-ink-900 mb-1.5">
-              Describe what you have in mind <span className="text-pink-500">*</span>
+              {t('custom.describeTitle')} <span className="text-pink-500">*</span>
             </div>
             <p className="text-ink-500 text-[13px] m-0 mb-2.5">
-              Tell us about the piece — occasion, style, details you love, what to keep
-              or change from the photo.
+              {t('custom.describeDesc')}
             </p>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={5}
-              placeholder="e.g. I love the embroidery on the sleeves in this photo. I'd like a similar style in ivory with gold thread, for a summer wedding in Constantine. The neckline can be different — something more open..."
+              placeholder={t('custom.describePlaceholder')}
               className={cn(inputCls, 'resize-y leading-[1.65]')}
             />
             <div className="flex justify-end mt-1">
@@ -350,7 +349,7 @@ export function CustomOrder() {
                   notes.length > 20 ? 'text-sage' : 'text-ink-400',
                 )}
               >
-                {notes.length} characters
+                {t('custom.charactersCount', { count: notes.length })}
               </span>
             </div>
           </div>
@@ -358,14 +357,14 @@ export function CustomOrder() {
           <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
             <div>
               <div className="font-bold text-[15px] text-ink-900 mb-1.5">
-                Garment type <span className="text-pink-500">*</span>
+                {t('custom.garmentType')} <span className="text-pink-500">*</span>
               </div>
               <select
                 value={garmentType}
                 onChange={(e) => setGarmentType(e.target.value)}
-                className={cn(inputCls, 'cursor-pointer appearance-none bg-[url(\'data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 fill%3D%22none%22 viewBox%3D%220 0 20 20%22%3E%3Cpath stroke%3D%22%236b7280%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22 stroke-width%3D%221.5%22 d%3D%22m6 8 4 4 4-4%22%2F%3E%3C%2Fsvg%3E\')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25rem] pr-10')}
+                className={cn(inputCls, 'cursor-pointer appearance-none bg-[url(\'data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 fill%3D%22none%22 viewBox%3D%220 0 20 20%22%3E%3Cpath stroke%3D%22%236b7280%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22 stroke-width%3D%221.5%22 d%3D%22m6 8 4 4 4-4%22%2F%3E%3C%2Fsvg%3E\')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25rem] pe-10')}
               >
-                <option value="">Select a garment type…</option>
+                <option value="">{t('custom.selectGarment')}</option>
                 {GARMENT_TYPES.map((g) => (
                   <option key={g} value={g}>{g}</option>
                 ))}
@@ -373,8 +372,8 @@ export function CustomOrder() {
             </div>
             <div>
               <div className="font-bold text-[15px] text-ink-900 mb-1.5">
-                Budget{' '}
-                <span className="text-xs text-ink-400 font-normal">— optional</span>
+                {t('custom.budget')}{' '}
+                <span className="text-xs text-ink-400 font-normal">{t('custom.optional')}</span>
               </div>
               <div className="relative">
                 <input
@@ -385,10 +384,10 @@ export function CustomOrder() {
                   }}
                   placeholder="0"
                   inputMode="numeric"
-                  className={cn(inputCls, 'pr-14 text-right tabular-nums')}
+                  className={cn(inputCls, 'pe-14 text-end tabular-nums')}
                 />
-                <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[13px] font-semibold text-ink-400 select-none">
-                  DA
+                <span className="pointer-events-none absolute end-3.5 top-1/2 -translate-y-1/2 text-[13px] font-semibold text-ink-400 select-none">
+                  {t('common.currency')}
                 </span>
               </div>
             </div>
@@ -397,11 +396,11 @@ export function CustomOrder() {
           <div className="flex justify-end">
             <Button
               size="lg"
-              iconRight={<ArrowRight size={18} />}
+              iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}
               onClick={() => setStep(2)}
               disabled={!canNext1}
             >
-              Continue
+              {t('common.continue')}
             </Button>
           </div>
         </div>
@@ -412,10 +411,10 @@ export function CustomOrder() {
         <div className="flex flex-col gap-7">
           <div>
             <div className="font-bold text-[15px] text-ink-900 mb-1.5">
-              Your size <span className="text-pink-500">*</span>
+              {t('custom.yourSize')} <span className="text-pink-500">*</span>
             </div>
             <p className="text-ink-500 text-[13px] m-0 mb-3">
-              We'll confirm measurements over WhatsApp after your request.
+              {t('custom.sizeConfirm')}
             </p>
             <div className="flex gap-2.5 flex-wrap">
               {SIZES.map((s) => (
@@ -425,26 +424,26 @@ export function CustomOrder() {
                   onClick={() => setSize(s)}
                   className={cn(
                     'rounded-md border-2 cursor-pointer font-bold text-sm transition-all font-ui',
-                    s === 'Custom fit' ? 'px-5 py-[11px]' : 'w-15 py-[11px]',
+                    s === CUSTOM_FIT ? 'px-5 py-[11px]' : 'w-15 py-[11px]',
                     size === s
                       ? 'border-pink-400 bg-pink-50 text-pink-600 shadow-brand'
                       : 'border-warm-200 bg-white text-ink-700',
                   )}
                 >
-                  {s}
+                  {s === CUSTOM_FIT ? t('custom.sizeCustomFit') : s}
                 </button>
               ))}
             </div>
-            {size === 'Custom fit' && (
+            {size === CUSTOM_FIT && (
               <div className="mt-3.5">
                 <div className="text-[13px] font-semibold text-ink-700 mb-1.5">
-                  Enter your measurements <span className="text-pink-500">*</span>
+                  {t('custom.enterMeasurements')} <span className="text-pink-500">*</span>
                 </div>
                 <textarea
                   value={customSize}
                   onChange={(e) => setCustomSize(e.target.value)}
                   rows={3}
-                  placeholder="e.g. Bust: 92cm, Waist: 74cm, Hips: 100cm, Height: 168cm — add any relevant details"
+                  placeholder={t('custom.measurementsPlaceholder')}
                   className={cn(inputCls, 'resize-y leading-[1.65] text-sm')}
                 />
               </div>
@@ -453,10 +452,10 @@ export function CustomOrder() {
 
           <div>
             <div className="font-bold text-[15px] text-ink-900 mb-1">
-              Colour palette <span className="text-pink-500">*</span>
+              {t('custom.colourPalette')} <span className="text-pink-500">*</span>
             </div>
             <p className="text-ink-500 text-[13px] m-0 mb-3.5">
-              Pick up to 3 colours. Our artisans will find the closest thread match.
+              {t('custom.colourDesc')}
             </p>
             <div className="grid grid-cols-6 gap-2.5">
               {COLOR_PALETTE.map(({ name, hex }) => {
@@ -499,7 +498,7 @@ export function CustomOrder() {
             </div>
             {colors.length > 0 && (
               <div className="mt-4 flex items-center gap-2.5">
-                <span className="text-[13px] text-ink-500">Selected:</span>
+                <span className="text-[13px] text-ink-500">{t('custom.selected')}</span>
                 {colors.map((name) => (
                   <span
                     key={name}
@@ -509,7 +508,7 @@ export function CustomOrder() {
                 ))}
                 {colors.length < 3 && (
                   <span className="text-xs text-ink-400">
-                    {3 - colors.length} more allowed
+                    {t('custom.moreAllowed', { count: 3 - colors.length })}
                   </span>
                 )}
               </div>
@@ -520,17 +519,17 @@ export function CustomOrder() {
             <Button
               variant="secondary"
               onClick={() => setStep(1)}
-              iconLeft={<ChevronLeft size={18} />}
+              iconLeft={<ChevronLeft size={18} className="rtl:-scale-x-100" />}
             >
-              Back
+              {t('common.back')}
             </Button>
             <Button
               size="lg"
-              iconRight={<ArrowRight size={18} />}
+              iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}
               onClick={() => setStep(3)}
               disabled={!canNext2}
             >
-              Continue
+              {t('common.continue')}
             </Button>
           </div>
         </div>
@@ -548,7 +547,7 @@ export function CustomOrder() {
               />
             )}
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] text-ink-500 mb-1">Your request</div>
+              <div className="text-[13px] text-ink-500 mb-1">{t('custom.yourRequest')}</div>
               <div className="font-semibold text-ink-900 text-sm flex gap-3 flex-wrap items-center">
                 <span>{size}</span>
                 <span className="flex gap-1.5">
@@ -571,14 +570,14 @@ export function CustomOrder() {
               onClick={() => setStep(1)}
               className="border-0 bg-transparent text-pink-600 text-xs font-semibold cursor-pointer flex-none"
             >
-              Edit
+              {t('common.edit')}
             </button>
           </div>
 
           <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
             <div className="flex flex-col gap-1.5">
               <label className="font-semibold text-[13px] text-ink-700">
-                Full name <span className="text-pink-500">*</span>
+                {t('custom.fullName')} <span className="text-pink-500">*</span>
               </label>
               <input
                 className={inputCls}
@@ -589,7 +588,7 @@ export function CustomOrder() {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-semibold text-[13px] text-ink-700">
-                Email <span className="text-pink-500">*</span>
+                {t('custom.email')} <span className="text-pink-500">*</span>
               </label>
               <input
                 type="email"
@@ -603,8 +602,8 @@ export function CustomOrder() {
           <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
             <div className="flex flex-col gap-1.5">
               <label className="font-semibold text-[13px] text-ink-700">
-                WhatsApp number{' '}
-                <span className="text-xs text-ink-400 font-normal">— we'll reply here</span>
+                {t('custom.whatsappNumber')}{' '}
+                <span className="text-xs text-ink-400 font-normal">{t('custom.replyHere')}</span>
               </label>
               <input
                 type="tel"
@@ -616,14 +615,14 @@ export function CustomOrder() {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-semibold text-[13px] text-ink-700">
-                Wilaya <span className="text-pink-500">*</span>
+                {t('custom.wilaya')} <span className="text-pink-500">*</span>
               </label>
               <select
                 className={cn(inputCls, 'cursor-pointer')}
                 value={contact.wilaya}
                 onChange={(e) => setContact((c) => ({ ...c, wilaya: e.target.value }))}
               >
-                <option value="">Select wilaya…</option>
+                <option value="">{t('custom.selectWilaya')}</option>
                 {wilayas.map((w, i) => (
                   <option key={w} value={w}>
                     {String(i + 1).padStart(2, '0')} — {w}
@@ -635,10 +634,7 @@ export function CustomOrder() {
 
           <div className="bg-warm-50 rounded-lg px-4.5 py-3.5 flex gap-2.5 items-start text-[13px] text-ink-500 border border-warm-200">
             <Info size={16} strokeWidth={2} className="text-gold flex-none mt-0.5" />
-            <span>
-              We'll review your request and send a quote within <strong>48 hours</strong>.
-              No payment required now — everything is confirmed over WhatsApp first.
-            </span>
+            <span>{t('custom.quoteInfo')}</span>
           </div>
 
           {submitError && (
@@ -651,12 +647,12 @@ export function CustomOrder() {
             <Button
               variant="secondary"
               onClick={() => setStep(2)}
-              iconLeft={<ChevronLeft size={18} />}
+              iconLeft={<ChevronLeft size={18} className="rtl:-scale-x-100" />}
             >
-              Back
+              {t('common.back')}
             </Button>
             <Button full size="lg" onClick={handleSubmit} disabled={!canSubmit || submitting}>
-              {submitting ? 'Sending…' : 'Send request ✶'}
+              {submitting ? t('custom.sending') : t('custom.sendRequest')}
             </Button>
           </div>
         </div>

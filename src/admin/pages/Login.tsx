@@ -5,7 +5,6 @@ import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/store/useAuth';
 import { ApiError } from '@/lib/api';
-import maibiLogo from '@/assets/maibi-logo.jpg';
 
 export function Login() {
   const navigate = useNavigate();
@@ -56,8 +55,16 @@ export function Login() {
         className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-warm-200 overflow-hidden"
       >
         <div className="flex flex-col items-center px-8 pt-8 pb-6 border-b border-warm-100 bg-linear-to-b from-pink-50/60 to-white">
-          <img src={maibiLogo} alt="Maibi" className="h-14 w-auto object-contain mb-2" />
-          <h1 className="font-display text-xl font-semibold text-ink-900">Admin sign in</h1>
+          {/* <img src={maibiLogo} alt="Maibi" className="h-25 w-auto object-contain mb-2" /> */}
+          <p
+            className="font-script my-3 text-pink-400 leading-none flex-none no-underline"
+            style={{ fontSize: 34 }}
+          >
+            Maibi
+          </p>
+          {/* <h1 className="font-display text-xl font-semibold text-ink-900">
+            Admin sign in
+          </h1> */}
           <p className="text-xs text-ink-400 mt-0.5">Manage your storefront</p>
         </div>
 
@@ -74,7 +81,10 @@ export function Login() {
               Email
             </label>
             <div className="relative">
-              <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
+              <Mail
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none"
+              />
               <input
                 type="email"
                 required
@@ -91,7 +101,10 @@ export function Login() {
               Password
             </label>
             <div className="relative">
-              <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
+              <Lock
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none"
+              />
               <input
                 type="password"
                 required
@@ -107,16 +120,20 @@ export function Login() {
             type="submit"
             disabled={loading}
             className={cn(
-              'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-pink-400 text-white text-sm font-bold shadow-brand transition',
-              loading ? 'opacity-70' : 'hover:brightness-105',
+              "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-pink-400 text-white text-sm font-bold shadow-brand transition",
+              loading ? "opacity-70" : "hover:brightness-105",
             )}
           >
             {loading ? (
               <>
-                <Loader2 size={15} className="animate-[spin_0.7s_linear_infinite]" /> Signing in…
+                <Loader2
+                  size={15}
+                  className="animate-[spin_0.7s_linear_infinite]"
+                />{" "}
+                Signing in…
               </>
             ) : (
-              'Sign in'
+              "Sign in"
             )}
           </button>
         </form>

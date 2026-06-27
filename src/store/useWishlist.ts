@@ -12,8 +12,7 @@ interface WishlistState {
 export const useWishlist = create<WishlistState>()(
   persist(
     (set, get) => ({
-      // Seed with the Yasmin Dress, matching the prototype's initial state.
-      ids: [0],
+      ids: [],
       toggle: (id) =>
         set((state) => ({
           ids: state.ids.includes(id)

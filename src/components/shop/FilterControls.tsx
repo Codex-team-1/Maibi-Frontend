@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { FILTER_LABELS } from '@/data/products';
+import { useI18n, type TranslationKey } from '@/i18n';
 import type { Category } from '@/types';
 
 /* ── Collapsible filter section ───────────────────────────────────────────── */
@@ -111,21 +112,27 @@ export function FilterContent({
   badgeLabels, toggleBadgeLabel,
   inStockOnly, toggleInStock,
 }: FilterContentProps) {
+  const { t } = useI18n();
   return (
     <>
-      <FilterSection title="Category">
+      <FilterSection title={t('filter.category')}>
         {categories.map((c) => (
           <CheckRow key={c} label={c} checked={cats.has(c as Category)} onChange={() => toggleCat(c as Category)} />
         ))}
       </FilterSection>
 
-      <FilterSection title="Availability" defaultOpen={false}>
-        <CheckRow label="In stock only" checked={inStockOnly} onChange={toggleInStock} />
+      <FilterSection title={t('filter.availability')} defaultOpen={false}>
+        <CheckRow label={t('filter.inStockOnly')} checked={inStockOnly} onChange={toggleInStock} />
       </FilterSection>
 
-      <FilterSection title="Labels" defaultOpen={false}>
+      <FilterSection title={t('filter.labels')} defaultOpen={false}>
         {FILTER_LABELS.map((b) => (
-          <CheckRow key={b} label={b} checked={badgeLabels.has(b)} onChange={() => toggleBadgeLabel(b)} />
+          <CheckRow
+            key={b}
+            label={t(`filterLabel.${b}` as TranslationKey)}
+            checked={badgeLabels.has(b)}
+            onChange={() => toggleBadgeLabel(b)}
+          />
         ))}
       </FilterSection>
     </>

@@ -5,7 +5,7 @@ import {
   TrendingUp, Package, DollarSign, Layers, LayoutGrid,
   List, ChevronUp, ChevronDown, Save, Trash2, BarChart3,
   Star, ShoppingBag, ChevronLeft, ChevronRight, Loader2,
-  ImagePlus, Tag, Megaphone, RotateCcw, Check,
+  ImagePlus, Tag, Megaphone, RotateCcw, Check, Percent, Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { fmt } from '@/lib/format';
@@ -148,6 +148,8 @@ interface ProductForm {
   colors: string[];
   active: boolean;
   promoted: boolean;
+  discountPercent: string;
+  discountUntil: string;
 }
 
 const CREATE_STEPS = [
@@ -172,19 +174,31 @@ function ProductModal({ product, onClose, onSaved }: {
   const isNew = !product;
   const { colors: paletteColors } = useConfig();
 
-  const [form, setForm] = useState<ProductForm>(() => ({
-    name:        product?.name ?? '',
-    price:       product?.price ?? '',
-    category:    product?.category ?? CATEGORIES[0],
-    description: product?.description ?? '',
-    stock:       product?.stock ?? 0,
-    inStock:     product?.inStock ?? true,
-    badgeLabel:  (product?.badgeLabel ?? '') as BadgeLabelOption,
-    sizes:       product?.sizes ?? [],
-    colors:      product?.colors ?? [],
-    active:      product?.active ?? true,
-    promoted:    product?.promoted ?? false,
-  }));
+  const [form, setForm] = useState<ProductForm>(() => {
+    const raw = product?.discountRaw;
+    let discountUntilVal = '';
+    if (raw?.activeUntil) {
+      try {
+        // datetime-local input expects "YYYY-MM-DDTHH:mm"
+        discountUntilVal = new Date(raw.activeUntil).toISOString().slice(0, 16);
+      } catch { /* ignore */ }
+    }
+    return {
+      name:            product?.name ?? '',
+      price:           product?.price ?? '',
+      category:        product?.category ?? CATEGORIES[0],
+      description:     product?.description ?? '',
+      stock:           product?.stock ?? 0,
+      inStock:         product?.inStock ?? true,
+      badgeLabel:      (product?.badgeLabel ?? '') as BadgeLabelOption,
+      sizes:           product?.sizes ?? [],
+      colors:          product?.colors ?? [],
+      active:          product?.active ?? true,
+      promoted:        product?.promoted ?? false,
+      discountPercent: raw?.percent ? String(raw.percent) : '',
+      discountUntil:   discountUntilVal,
+    };
+  });
 
   const toggleSize = (s: string) =>
     setForm((p) => ({ ...p, sizes: p.sizes.includes(s) ? p.sizes.filter((x) => x !== s) : [...p.sizes, s] }));
@@ -233,6 +247,12 @@ function ProductModal({ product, onClose, onSaved }: {
     setSaving(true);
     setSaveError(null);
     try {
+      const pct   = parseInt(form.discountPercent, 10);
+      const until = form.discountUntil ? new Date(form.discountUntil).toISOString() : '';
+      const discountBody = (pct >= 1 && pct <= 99 && until)
+        ? { percent: pct, activeUntil: until }
+        : null;
+
       const body = {
         name:        form.name.trim(),
         price:       form.price.trim(),
@@ -245,6 +265,7 @@ function ProductModal({ product, onClose, onSaved }: {
         colors:      form.colors,
         active:      form.active,
         promoted:    form.promoted,
+        discount:    discountBody,
       };
 
       const saved = isNew
@@ -474,8 +495,14 @@ function ProductModal({ product, onClose, onSaved }: {
     </>
   );
 
+  const discountPct = parseInt(form.discountPercent, 10);
+  const discountUntilDate = form.discountUntil ? new Date(form.discountUntil) : null;
+  const discountValid = discountPct >= 1 && discountPct <= 99 && !!discountUntilDate && discountUntilDate > new Date();
+  const discountActive = discountValid;
+
   const PromoFields = (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Featured toggle */}
       <div className="bg-linear-to-br from-pink-50 to-pink-100/50 border border-pink-100 rounded-2xl p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-pink-400 flex items-center justify-center shadow-brand">
@@ -497,10 +524,110 @@ function ProductModal({ product, onClose, onSaved }: {
             </div>
             <div>
               <p className="text-sm font-semibold text-ink-700">Featured product</p>
-              <p className="text-[11px] text-ink-400 mt-0.5">Show in homepage hero & shop top</p>
+              <p className="text-[11px] text-ink-400 mt-0.5">Show in homepage hero &amp; shop top</p>
             </div>
           </div>
           <Toggle on={form.promoted} onChange={() => set('promoted', !form.promoted)} />
+        </div>
+      </div>
+
+      {/* Discount section */}
+      <div className="border border-rose-100 rounded-2xl overflow-hidden">
+        <div className="bg-linear-to-r from-rose-50 to-orange-50 px-5 py-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-rose-500 flex items-center justify-center shrink-0">
+            <Percent size={16} className="text-white" />
+          </div>
+          <div>
+            <p className="font-semibold text-ink-900 text-sm">Timed Discount</p>
+            <p className="text-[11px] text-ink-400 mt-0.5">Automatically expires — no need to manually remove it</p>
+          </div>
+          {discountActive && (
+            <span className="ml-auto text-[10px] font-bold bg-rose-500 text-white px-2.5 py-1 rounded-full shrink-0 flex items-center gap-1">
+              <Clock size={9} /> Active
+            </span>
+          )}
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-ink-400 uppercase tracking-widest mb-1.5">
+                Discount %
+              </label>
+              <div className="relative">
+                <input
+                  type="number" min={1} max={99} placeholder="e.g. 20"
+                  value={form.discountPercent}
+                  onChange={(e) => set('discountPercent', e.target.value)}
+                  className={cn(
+                    'w-full pl-3.5 pr-8 py-2.5 bg-warm-50 border rounded-xl text-sm text-ink-700 focus:outline-none focus:ring-2 transition',
+                    discountPct >= 1 && discountPct <= 99
+                      ? 'border-emerald-300 focus:border-emerald-400 focus:ring-emerald-100'
+                      : 'border-warm-200 focus:border-rose-300 focus:ring-rose-100',
+                  )}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs font-bold pointer-events-none">%</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-ink-400 uppercase tracking-widest mb-1.5">
+                Ends at
+              </label>
+              <input
+                type="datetime-local"
+                value={form.discountUntil}
+                min={new Date().toISOString().slice(0, 16)}
+                onChange={(e) => set('discountUntil', e.target.value)}
+                className={cn(
+                  'w-full px-3.5 py-2.5 bg-warm-50 border rounded-xl text-sm text-ink-700 focus:outline-none focus:ring-2 transition',
+                  discountUntilDate && discountUntilDate > new Date()
+                    ? 'border-emerald-300 focus:border-emerald-400 focus:ring-emerald-100'
+                    : 'border-warm-200 focus:border-rose-300 focus:ring-rose-100',
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Clear button */}
+          {(form.discountPercent || form.discountUntil) && (
+            <button
+              type="button"
+              onClick={() => { set('discountPercent', ''); set('discountUntil', ''); }}
+              className="text-xs text-ink-400 hover:text-rose-500 transition-colors flex items-center gap-1"
+            >
+              <X size={11} /> Clear discount
+            </button>
+          )}
+
+          {/* Live preview */}
+          {form.price && (
+            <div className="bg-warm-50 rounded-xl p-3.5 space-y-1">
+              <p className="text-[11px] font-bold text-ink-400 uppercase tracking-widest">Price preview</p>
+              {discountActive ? (() => {
+                const baseNum = parseInt(form.price.replace(/\s/g, '').replace('DA', ''), 10) || 0;
+                const final   = Math.round(baseNum * (1 - discountPct / 100));
+                const saved   = baseNum - final;
+                return (
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-lg font-bold text-rose-600">
+                      {final.toLocaleString('fr-FR')} DA
+                    </span>
+                    <span className="text-sm text-ink-400 line-through">{form.price}</span>
+                    <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                      Save {saved.toLocaleString('fr-FR')} DA
+                    </span>
+                  </div>
+                );
+              })() : (
+                <p className="text-sm text-ink-400">
+                  {form.discountPercent && !discountUntilDate ? 'Set an end date to activate discount'
+                    : discountUntilDate && !(discountPct >= 1 && discountPct <= 99) ? 'Enter a valid % (1–99) to activate'
+                    : discountUntilDate && discountUntilDate <= new Date() ? 'End date must be in the future'
+                    : 'No discount active'}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -512,8 +639,9 @@ function ProductModal({ product, onClose, onSaved }: {
         </div>
       </div>
 
+      {/* Active promotions preview */}
       <div>
-        <p className="text-xs font-bold text-ink-400 uppercase tracking-widest mb-3">Badge Preview</p>
+        <p className="text-xs font-bold text-ink-400 uppercase tracking-widest mb-3">Active Promotions</p>
         <div className="flex flex-wrap gap-2">
           {form.promoted && (
             <span className="flex items-center gap-1 bg-pink-400 text-white text-xs font-bold px-2.5 py-1 rounded-full">
@@ -525,7 +653,12 @@ function ProductModal({ product, onClose, onSaved }: {
               {form.badgeLabel}
             </span>
           )}
-          {!form.promoted && !form.badgeLabel && (
+          {discountActive && (
+            <span className="flex items-center gap-1 bg-rose-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              <Percent size={10} /> -{discountPct}% sale
+            </span>
+          )}
+          {!form.promoted && !form.badgeLabel && !discountActive && (
             <p className="text-xs text-ink-400">No active promotions</p>
           )}
         </div>

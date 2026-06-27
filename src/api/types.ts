@@ -31,6 +31,12 @@ export interface ProductImage {
   publicId: string;
 }
 
+export interface ProductDiscountDTO {
+  percent: number;
+  activeUntil: string;
+  discountedPrice: string;
+}
+
 export interface ProductDTO {
   id: number;
   name: string;
@@ -43,6 +49,8 @@ export interface ProductDTO {
   images: ProductImage[];
   sizes: string[];
   colors: string[];
+  rating: { ratingCount: number; ratingAvg: number };
+  discount?: ProductDiscountDTO;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +60,12 @@ export interface AdminProductDTO extends ProductDTO {
   promoted: boolean;
   totalSold: number;
   revenue: number;
+  discountRaw?: { percent: number; activeUntil: string | null };
+}
+
+export interface DiscountBody {
+  percent: number;
+  activeUntil: string;
 }
 
 export interface CreateProductBody {
@@ -67,6 +81,7 @@ export interface CreateProductBody {
   colors?: string[];
   active?: boolean;
   promoted?: boolean;
+  discount?: DiscountBody | null;
 }
 
 export type UpdateProductBody = Partial<CreateProductBody>;

@@ -21,6 +21,11 @@ import { Button } from '@/components/ui';
 import { useCart, selectSubtotal } from '@/store/useCart';
 import { useConfig } from '@/store/useConfig';
 import { useLayoutContext } from '@/hooks/useLayoutContext';
+import { useI18n, type TFn, type TranslationKey } from '@/i18n';
+
+/** Resolve a zod error message that is stored as a translation key. */
+const tErr = (t: TFn, msg?: string): string | undefined =>
+  msg ? t(msg as TranslationKey) : undefined;
 import { fmt } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import { createOrder } from '@/api';
@@ -34,7 +39,7 @@ import shippingRates from '@/data/world_express_shipping_rates.json';
 
 type ShippingType = 'home' | 'desk';
 
-const STEPS = ['Shipping', 'Payment', 'Review'];
+const STEP_KEYS: TranslationKey[] = ['checkout.stepShipping', 'checkout.stepPayment', 'checkout.stepReview'];
 
 /* Only COD is live; others are coming soon. */
 const DISABLED_METHODS: PaymentMethodId[] = ['cib', 'dahabia', 'baridimob'];
@@ -59,6 +64,7 @@ function getShippingFee(wilayaName: string, type: ShippingType): number | null {
 export function Checkout() {
   const navigate = useNavigate();
   const { isMobile } = useLayoutContext();
+  const { t } = useI18n();
   const { paymentMethods: PAYMENT_METHODS, wilayas: WILAYAS } = useConfig();
 
   const items = useCart((s) => s.items);
@@ -149,11 +155,11 @@ export function Checkout() {
       if (err instanceof ApiError) {
         setPlaceError(
           err.code === 'CONFLICT'
-            ? 'One or more items just went out of stock. Please review your bag.'
+            ? t('checkout.conflictError')
             : err.message,
         );
       } else {
-        setPlaceError('Could not place your order. Please try again.');
+        setPlaceError(t('checkout.placeError'));
       }
     } finally {
       setPlacing(false);
@@ -163,12 +169,12 @@ export function Checkout() {
   /* ── Stepper ── */
   const Stepper = () => (
     <div className={cn('flex items-center justify-center', isMobile ? 'mb-7' : 'mb-9')}>
-      {STEPS.map((s, i) => {
+      {STEP_KEYS.map((sKey, i) => {
         const n = i + 1;
         const done = step > n;
         const active = step === n;
         return (
-          <Fragment key={s}>
+          <Fragment key={sKey}>
             <div
               className={cn('flex flex-col items-center gap-1.5', done && 'cursor-pointer')}
               onClick={() => done && setStep(n)}
@@ -188,10 +194,10 @@ export function Checkout() {
                   done || active ? 'text-pink-600' : 'text-ink-400',
                 )}
               >
-                {s}
+                {t(sKey)}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
+            {i < STEP_KEYS.length - 1 && (
               <div
                 className="h-0.5 mb-5.5 transition-colors"
                 style={{
@@ -218,17 +224,17 @@ export function Checkout() {
   /* ── Step 4 — Success ── */
   if (step === 4 && placedOrder) {
     const o = placedOrder;
-    const deliveryLabel = o.shippingType === 'home' ? 'Home delivery' : 'Stop desk';
+    const deliveryLabel = o.shippingType === 'home' ? t('checkout.homeDelivery') : t('checkout.stopDesk');
     const paymentLabel =
       PAYMENT_METHODS.find((m) => m.id === o.paymentMethod)?.label ?? o.paymentMethod;
     const rows: [string, string][] = [
-      ['Order ID', o.id],
-      ['Shipping to', [o.address, o.city, o.wilaya].filter(Boolean).join(', ')],
-      ['Delivery', deliveryLabel],
-      ['Payment', paymentLabel],
-      ...(o.subtotal != null ? [['Subtotal', fmt(o.subtotal)] as [string, string]] : []),
-      ...(o.shippingFee != null ? [['Shipping fee', fmt(o.shippingFee)] as [string, string]] : []),
-      ['Total', fmt(o.total)],
+      [t('checkout.orderId'), o.id],
+      [t('checkout.shippingTo'), [o.address, o.city, o.wilaya].filter(Boolean).join(', ')],
+      [t('checkout.delivery').replace(/:$/, ''), deliveryLabel],
+      [t('checkout.payment'), paymentLabel],
+      ...(o.subtotal != null ? [[t('summary.subtotal'), fmt(o.subtotal)] as [string, string]] : []),
+      ...(o.shippingFee != null ? [[t('checkout.shippingFee'), fmt(o.shippingFee)] as [string, string]] : []),
+      [t('checkout.total'), fmt(o.total)],
     ];
     return (
       <main
@@ -246,19 +252,18 @@ export function Checkout() {
             isMobile ? 'text-3xl' : 'text-[40px]',
           )}
         >
-          Order placed!
+          {t('checkout.orderPlaced')}
         </h1>
         <p className="text-ink-700 text-[15px] leading-relaxed mb-2">
-          Thank you, <strong>{o.customer}</strong>. Your order is confirmed and our
-          artisans are preparing it with care.
+          {t('checkout.orderPlacedBody', { name: o.customer })}
         </p>
         <p className="text-ink-500 text-sm mb-7">
-          A confirmation will be sent to <strong>{o.email}</strong>.
+          {t('checkout.confirmationSent', { email: o.email })}
         </p>
-        <div className="bg-pink-50 border-stitch rounded-lg px-5 py-4.5 mb-7 text-left">
+        <div className="bg-pink-50 border-stitch rounded-lg px-5 py-4.5 mb-7 text-start">
           <div className="flex justify-between items-baseline mb-2.5">
-            <span className="font-bold text-ink-900 text-sm">Order #{o.id}</span>
-            <span className="text-ink-500 text-xs">Expected: 3–5 days</span>
+            <span className="font-bold text-ink-900 text-sm">{t('checkout.orderNumber', { id: o.id })}</span>
+            <span className="text-ink-500 text-xs">{t('checkout.expected')}</span>
           </div>
           {rows.map(([k, v]) => (
             <div key={k} className="flex gap-2.5 text-[13px] py-0.5">
@@ -268,11 +273,11 @@ export function Checkout() {
           ))}
         </div>
         <div className="flex gap-3 justify-center flex-wrap">
-          <Button onClick={() => navigate('/shop')} iconRight={<ArrowRight size={18} />}>
-            Back to shop
+          <Button onClick={() => navigate('/shop')} iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}>
+            {t('common.backToShop')}
           </Button>
           <Button variant="stitch" onClick={() => navigate('/wishlist')}>
-            View wishlist
+            {t('checkout.viewWishlist')}
           </Button>
         </div>
       </main>
@@ -294,7 +299,7 @@ export function Checkout() {
           isMobile && 'px-4',
         )}
       >
-        <ChevronLeft size={20} strokeWidth={1.8} /> Continue shopping
+        <ChevronLeft size={20} strokeWidth={1.8} className="rtl:-scale-x-100" /> {t('common.continueShopping')}
       </button>
 
       {/* Mobile order summary toggle */}
@@ -306,8 +311,7 @@ export function Checkout() {
           style={{ width: 'calc(100% - 32px)' }}
         >
           <span className="flex items-center gap-2 font-semibold text-pink-700 text-sm">
-            <ShoppingBag size={18} strokeWidth={1.8} /> Order summary ({items.length}{' '}
-            item{items.length !== 1 ? 's' : ''})
+            <ShoppingBag size={18} strokeWidth={1.8} /> {t(items.length === 1 ? 'checkout.summaryItemsOne' : 'checkout.summaryItemsMany', { count: items.length })}
           </span>
           <span className="flex items-center gap-2 font-bold text-pink-600">
             {fmt(total)}
@@ -331,7 +335,7 @@ export function Checkout() {
           <div className="flex items-center gap-2.5 mb-7 flex-wrap">
             <div className="font-script text-pink-400 text-[26px] leading-none">Maibi</div>
             <div className="w-px h-5 bg-warm-200" />
-            <div className="font-display text-lg font-semibold text-ink-900">Checkout</div>
+            <div className="font-display text-lg font-semibold text-ink-900">{t('checkout.title')}</div>
           </div>
 
           <Stepper />
@@ -343,65 +347,65 @@ export function Checkout() {
               className="flex flex-col"
               noValidate
             >
-              <SectionHeading icon={<User size={18} />}>Contact</SectionHeading>
+              <SectionHeading icon={<User size={18} />}>{t('checkout.contact')}</SectionHeading>
               <div className="grid gap-3.5 mb-6">
                 <FieldText
-                  label="Email address"
+                  label={t('checkout.emailAddress')}
                   required
                   type="email"
                   placeholder="you@example.com"
-                  error={shippingForm.formState.errors.email?.message}
+                  error={tErr(t, shippingForm.formState.errors.email?.message)}
                   {...shippingForm.register('email')}
                 />
                 <div
                   className={cn('grid gap-3.5', isMobile ? 'grid-cols-1' : 'grid-cols-2')}
                 >
                   <FieldText
-                    label="First name"
+                    label={t('checkout.firstName')}
                     required
                     placeholder="Yasmine"
-                    error={shippingForm.formState.errors.firstName?.message}
+                    error={tErr(t, shippingForm.formState.errors.firstName?.message)}
                     {...shippingForm.register('firstName')}
                   />
                   <FieldText
-                    label="Last name"
+                    label={t('checkout.lastName')}
                     required
                     placeholder="Benali"
-                    error={shippingForm.formState.errors.lastName?.message}
+                    error={tErr(t, shippingForm.formState.errors.lastName?.message)}
                     {...shippingForm.register('lastName')}
                   />
                 </div>
                 <FieldText
-                  label="Phone / WhatsApp"
+                  label={t('checkout.phoneWhatsapp')}
                   required
                   type="tel"
                   placeholder="+213 6XX XXX XXX"
-                  error={shippingForm.formState.errors.phone?.message}
+                  error={tErr(t, shippingForm.formState.errors.phone?.message)}
                   {...shippingForm.register('phone')}
                 />
               </div>
 
-              <SectionHeading icon={<MapPin size={18} />}>Shipping address</SectionHeading>
+              <SectionHeading icon={<MapPin size={18} />}>{t('checkout.shippingAddress')}</SectionHeading>
               <div className="grid gap-3.5 mb-6">
                 <FieldText
-                  label="Street address"
+                  label={t('checkout.streetAddress')}
                   required
                   placeholder="12 Rue Didouche Mourad"
-                  error={shippingForm.formState.errors.address?.message}
+                  error={tErr(t, shippingForm.formState.errors.address?.message)}
                   {...shippingForm.register('address')}
                 />
                 <div
                   className={cn('grid gap-3.5', isMobile ? 'grid-cols-1' : 'grid-cols-2')}
                 >
                   <FieldText
-                    label="City"
+                    label={t('checkout.city')}
                     required
                     placeholder="Alger Centre"
-                    error={shippingForm.formState.errors.city?.message}
+                    error={tErr(t, shippingForm.formState.errors.city?.message)}
                     {...shippingForm.register('city')}
                   />
                   <div className="flex flex-col gap-1.5">
-                    <FieldLabel required>Wilaya</FieldLabel>
+                    <FieldLabel required>{t('checkout.wilaya')}</FieldLabel>
                     <select
                       className={cn(
                         inputCls(!!shippingForm.formState.errors.wilaya),
@@ -410,7 +414,7 @@ export function Checkout() {
                       defaultValue=""
                       {...shippingForm.register('wilaya')}
                     >
-                      <option value="">Select wilaya…</option>
+                      <option value="">{t('checkout.selectWilaya')}</option>
                       {WILAYAS.map((w, i) => (
                         <option key={w} value={w}>
                           {String(i + 1).padStart(2, '0')} — {w}
@@ -419,32 +423,32 @@ export function Checkout() {
                     </select>
                     {shippingForm.formState.errors.wilaya && (
                       <span className="text-xs text-rose-red">
-                        {shippingForm.formState.errors.wilaya.message}
+                        {tErr(t, shippingForm.formState.errors.wilaya.message)}
                       </span>
                     )}
                   </div>
                 </div>
                 <FieldText
-                  label="Delivery notes"
-                  placeholder="Apartment, floor, landmark…"
+                  label={t('checkout.deliveryNotes')}
+                  placeholder={t('checkout.deliveryNotesPlaceholder')}
                   {...shippingForm.register('notes')}
                 />
               </div>
 
-              <SectionHeading icon={<Package size={18} />}>Delivery type</SectionHeading>
+              <SectionHeading icon={<Package size={18} />}>{t('checkout.deliveryType')}</SectionHeading>
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {(
                   [
                     {
                       value: 'home' as ShippingType,
-                      label: 'Home delivery',
-                      sub: 'Delivered to your door',
+                      label: t('checkout.homeDelivery'),
+                      sub: t('checkout.homeDeliverySub'),
                       icon: '🏠',
                     },
                     {
                       value: 'desk' as ShippingType,
-                      label: 'Stop desk',
-                      sub: 'Pick up at agency',
+                      label: t('checkout.stopDesk'),
+                      sub: t('checkout.stopDeskSub'),
                       icon: '📦',
                     },
                   ] as const
@@ -489,7 +493,7 @@ export function Checkout() {
                       <div className="font-bold text-ink-900 text-sm mt-1">{opt.label}</div>
                       <div className="text-[11px] text-ink-500">{opt.sub}</div>
                       <div className="font-bold text-pink-600 text-[13px] mt-1">
-                        {fee !== null ? fmt(fee) : watchedWilaya ? '—' : 'Select wilaya'}
+                        {fee !== null ? fmt(fee) : watchedWilaya ? '—' : t('checkout.selectWilayaShort')}
                       </div>
                     </label>
                   );
@@ -497,13 +501,13 @@ export function Checkout() {
               </div>
               {shippingForm.formState.errors.shippingType && (
                 <span className="text-xs text-rose-red -mt-4 mb-4">
-                  {shippingForm.formState.errors.shippingType.message}
+                  {tErr(t, shippingForm.formState.errors.shippingType.message)}
                 </span>
               )}
 
               <div className="flex justify-end mt-2">
-                <Button type="submit" size="lg" iconRight={<ArrowRight size={18} />}>
-                  Continue to payment
+                <Button type="submit" size="lg" iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}>
+                  {t('checkout.continueToPayment')}
                 </Button>
               </div>
             </form>
@@ -513,7 +517,7 @@ export function Checkout() {
           {step === 2 && (
             <div className="flex flex-col">
               <SectionHeading icon={<CreditCard size={18} />}>
-                Payment method
+                {t('checkout.paymentMethod')}
               </SectionHeading>
               <div className="flex flex-col gap-2.5 mb-6">
                 {PAYMENT_METHODS.map((m) => {
@@ -547,7 +551,7 @@ export function Checkout() {
                           {m.label}
                           {disabled ? (
                             <span className="bg-warm-200 text-ink-400 text-[10px] font-bold rounded-full px-2 py-0.5 uppercase tracking-[0.06em]">
-                              Coming soon
+                              {t('checkout.comingSoon')}
                             </span>
                           ) : m.badge ? (
                             <span className="bg-pink-100 text-pink-700 text-[10px] font-bold rounded-full px-2 py-0.5 uppercase tracking-[0.06em]">
@@ -578,12 +582,12 @@ export function Checkout() {
                 <Button
                   variant="secondary"
                   onClick={() => setStep(1)}
-                  iconLeft={<ChevronLeft size={18} />}
+                  iconLeft={<ChevronLeft size={18} className="rtl:-scale-x-100" />}
                 >
-                  Back
+                  {t('common.back')}
                 </Button>
-                <Button size="lg" iconRight={<ArrowRight size={18} />} onClick={goToReview}>
-                  Review order
+                <Button size="lg" iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />} onClick={goToReview}>
+                  {t('checkout.reviewOrder')}
                 </Button>
               </div>
             </div>
@@ -594,8 +598,9 @@ export function Checkout() {
             <div className="flex flex-col gap-4.5">
               <ReviewBlock
                 icon={<MapPin size={15} />}
-                title="Shipping to"
+                title={t('checkout.shippingTo')}
                 onEdit={() => setStep(1)}
+                editLabel={t('common.edit')}
               >
                 <div className="font-semibold text-ink-900">
                   {shipping.firstName} {shipping.lastName}
@@ -606,23 +611,24 @@ export function Checkout() {
                 </div>
                 <div>{shipping.phone}</div>
                 <div className="mt-1 text-[13px]">
-                  <span className="text-ink-500">Delivery: </span>
+                  <span className="text-ink-500">{t('checkout.delivery')} </span>
                   <span className="font-semibold text-ink-900">
-                    {shipping.shippingType === 'home' ? 'Home delivery' : 'Stop desk'}
+                    {shipping.shippingType === 'home' ? t('checkout.homeDelivery') : t('checkout.stopDesk')}
                   </span>
                   {shippingFee !== null && (
-                    <span className="text-pink-600 font-bold ml-1.5">· {fmt(shippingFee)}</span>
+                    <span className="text-pink-600 font-bold ms-1.5">· {fmt(shippingFee)}</span>
                   )}
                 </div>
                 {shipping.notes && (
-                  <div className="text-ink-500 text-[13px] mt-1">Note: {shipping.notes}</div>
+                  <div className="text-ink-500 text-[13px] mt-1">{t('checkout.note', { note: shipping.notes })}</div>
                 )}
               </ReviewBlock>
 
               <ReviewBlock
                 icon={<CreditCard size={15} />}
-                title="Payment"
+                title={t('checkout.payment')}
                 onEdit={() => setStep(2)}
+                editLabel={t('common.edit')}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-[22px]">{selectedPayment.icon}</span>
@@ -636,15 +642,15 @@ export function Checkout() {
               </ReviewBlock>
 
               <div className="text-xs text-ink-500 leading-relaxed text-center px-2">
-                By placing your order you agree to Maibi's{' '}
+                {t('checkout.termsPrefix')}{' '}
                 <a href="#" className="text-pink-600">
-                  terms
+                  {t('checkout.terms')}
                 </a>{' '}
-                and{' '}
+                {t('checkout.and')}{' '}
                 <a href="#" className="text-pink-600">
-                  privacy policy
+                  {t('checkout.privacyPolicy')}
                 </a>
-                . All sales are final on limited-edition pieces.
+                {t('checkout.termsSuffix')}
               </div>
               {placeError && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-red rounded-lg px-4 py-3 text-sm">
@@ -655,9 +661,9 @@ export function Checkout() {
                 <Button
                   variant="secondary"
                   onClick={() => setStep(2)}
-                  iconLeft={<ChevronLeft size={18} />}
+                  iconLeft={<ChevronLeft size={18} className="rtl:-scale-x-100" />}
                 >
-                  Back
+                  {t('common.back')}
                 </Button>
                 <Button
                   full
@@ -668,10 +674,10 @@ export function Checkout() {
                   {placing ? (
                     <span className="flex items-center gap-2.5">
                       <Loader2 size={18} className="animate-[spin_0.7s_linear_infinite]" />{' '}
-                      Placing order…
+                      {t('checkout.placingOrder')}
                     </span>
                   ) : (
-                    `Place order · ${fmt(total)}`
+                    t('checkout.placeOrder', { total: fmt(total) })
                   )}
                 </Button>
               </div>
@@ -737,11 +743,13 @@ function ReviewBlock({
   icon,
   title,
   onEdit,
+  editLabel,
   children,
 }: {
   icon: React.ReactNode;
   title: string;
   onEdit: () => void;
+  editLabel: string;
   children: React.ReactNode;
 }) {
   return (
@@ -756,7 +764,7 @@ function ReviewBlock({
           onClick={onEdit}
           className="border-0 bg-transparent text-pink-600 font-semibold text-xs cursor-pointer"
         >
-          Edit
+          {editLabel}
         </button>
       </div>
       <div className="px-4.5 py-3.5 text-sm leading-[1.7] text-ink-700">{children}</div>

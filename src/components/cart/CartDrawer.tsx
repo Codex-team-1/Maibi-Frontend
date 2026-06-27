@@ -1,20 +1,32 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button, Card, QuantityStepper } from '@/components/ui';
 import { useCart, selectSubtotal } from '@/store/useCart';
 import { useUI } from '@/store/useUI';
+import { useI18n } from '@/i18n';
 import { fmt } from '@/lib/format';
 
 export function CartDrawer({ isMobile }: { isMobile: boolean }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { t, dir } = useI18n();
   const open = useUI((s) => s.cartOpen);
   const closeCart = useUI((s) => s.closeCart);
+
+  // Close whenever the user navigates to a different page
+  useEffect(() => {
+    closeCart();
+  }, [pathname]);
 
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const subtotal = useCart(selectSubtotal);
+
+  // Slide in from the inline-end edge so the drawer mirrors under RTL.
+  const offscreen = dir === 'rtl' ? '-100%' : '100%';
 
   const checkout = () => {
     closeCart();
@@ -34,20 +46,20 @@ export function CartDrawer({ isMobile }: { isMobile: boolean }) {
             className="fixed inset-0 bg-ink-900/35 z-40"
           />
           <motion.aside
-            initial={{ x: '100%' }}
+            initial={{ x: offscreen }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: offscreen }}
             transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
-            className="fixed top-0 right-0 bottom-0 z-41 bg-warm-50 shadow-lg flex flex-col max-w-screen"
+            className="fixed top-0 end-0 bottom-0 z-41 bg-warm-50 shadow-lg flex flex-col max-w-screen"
             style={{ width: isMobile ? '100vw' : 420 }}
           >
             <div className="flex items-center justify-between px-5 pt-5 pb-3.5 border-b border-warm-200">
               <span className="font-display text-[22px] font-semibold text-ink-900">
-                Your bag
+                {t('cart.title')}
               </span>
               <button
                 type="button"
-                aria-label="Close cart"
+                aria-label={t('cart.closeCart')}
                 onClick={closeCart}
                 className="border-0 bg-transparent cursor-pointer flex text-ink-500"
               >
@@ -59,7 +71,7 @@ export function CartDrawer({ isMobile }: { isMobile: boolean }) {
               {items.length === 0 && (
                 <div className="text-center py-20 text-ink-500">
                   <div className="font-script text-4xl text-pink-300">Maibi</div>
-                  <p>Your bag is empty.</p>
+                  <p>{t('cart.empty')}</p>
                 </div>
               )}
 
@@ -81,7 +93,7 @@ export function CartDrawer({ isMobile }: { isMobile: boolean }) {
                       </div>
                       <button
                         type="button"
-                        aria-label="Remove item"
+                        aria-label={t('cart.removeItem')}
                         onClick={() => remove(i)}
                         className="border-0 bg-transparent flex text-ink-400 cursor-pointer p-0 flex-none"
                       >
@@ -89,7 +101,7 @@ export function CartDrawer({ isMobile }: { isMobile: boolean }) {
                       </button>
                     </div>
                     <div className="text-xs text-ink-500">
-                      {it.size && <span>Size {it.size}</span>}
+                      {it.size && <span>{t('cart.size', { size: it.size })}</span>}
                       {it.size && it.color && <span className="mx-1">·</span>}
                       {it.color && <span>{it.color}</span>}
                     </div>
@@ -110,16 +122,16 @@ export function CartDrawer({ isMobile }: { isMobile: boolean }) {
             {items.length > 0 && (
               <div className="px-5 pt-4 pb-6 border-t border-warm-200">
                 <div className="flex justify-between mb-1">
-                  <span className="text-ink-500">Subtotal</span>
+                  <span className="text-ink-500">{t('cart.subtotal')}</span>
                   <span className="font-bold text-xl text-ink-900">
                     {fmt(subtotal)}
                   </span>
                 </div>
                 <div className="text-xs text-ink-400 mb-3">
-                  Shipping calculated at checkout
+                  {t('cart.shippingAtCheckout')}
                 </div>
                 <Button full size="lg" onClick={checkout}>
-                  Checkout
+                  {t('cart.checkout')}
                 </Button>
               </div>
             )}

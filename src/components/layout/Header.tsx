@@ -1,38 +1,39 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, Sparkles, Scissors } from 'lucide-react';
-import { useCart, selectCartCount } from '@/store/useCart';
+import { Search, Heart, Sparkles, Scissors, Globe, ShoppingBag } from 'lucide-react';
 import { useWishlist, selectWishCount } from '@/store/useWishlist';
+import { useCart, selectCartCount } from '@/store/useCart';
 import { useUI } from '@/store/useUI';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 const LINKS: Array<{
-  label: string;
+  labelKey: TranslationKey;
   to: string;
   dot?: string;
   icon?: React.ReactNode;
 }> = [
-  { label: 'Shop', to: '/shop' },
-  { label: 'Dresses', to: '/shop?q=Dress' },
-  { label: 'Robes', to: '/shop?q=Robe' },
+  { labelKey: 'nav.shop', to: '/shop' },
+  { labelKey: 'nav.dresses', to: '/shop?q=Dress' },
+  { labelKey: 'nav.robes', to: '/shop?q=Robe' },
   {
-    label: 'New in',
+    labelKey: 'nav.newIn',
     to: '/shop?sort=new',
     dot: 'bg-pink-500',
     icon: <Sparkles size={11} strokeWidth={2.2} />,
   },
   {
-    label: 'Custom order',
+    labelKey: 'nav.customOrder',
     to: '/custom-order',
     icon: <Scissors size={11} strokeWidth={2.2} />,
   },
-  { label: 'Our story', to: '/#our-story' },
+  { labelKey: 'nav.ourStory', to: '/#our-story' },
 ];
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute top-0 right-0 bg-pink-500 text-white text-[10px] font-bold rounded-full min-w-4 h-4 grid place-items-center px-[3px]">
+    <span className="absolute top-0 end-0 bg-pink-500 text-white text-[10px] font-bold rounded-full min-w-4 h-4 grid place-items-center px-[3px]">
       {count}
     </span>
   );
@@ -69,7 +70,7 @@ function NavItem({
       >
         {icon && <span className="text-pink-400">{icon}</span>}
         <span>{label}</span>
-        <span className="absolute bottom-0 left-0 h-[2px] w-0 rounded-full bg-pink-400 transition-all duration-300" />
+        <span className="absolute bottom-0 start-0 h-[2px] w-0 rounded-full bg-pink-400 transition-all duration-300" />
       </a>
     );
   }
@@ -98,21 +99,38 @@ function NavItem({
             </span>
           )}
           <span>{label}</span>
-          <span className="absolute bottom-0 left-0 h-[2px] w-0 rounded-full bg-pink-400 transition-all duration-300" />
+          <span className="absolute bottom-0 start-0 h-[2px] w-0 rounded-full bg-pink-400 transition-all duration-300" />
         </>
       )}
     </NavLink>
   );
 }
 
+/** Compact two-language toggle. Shows the language you'd switch *to*. */
+function LanguageToggle() {
+  const { lang, setLang, t } = useI18n();
+  return (
+    <button
+      type="button"
+      aria-label={t('lang.label')}
+      onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+      className="flex items-center gap-1.5 border-0 bg-transparent cursor-pointer text-ink-500 p-2 rounded-full transition-all duration-200 hover:text-pink-500 hover:bg-pink-50 hover:scale-105 active:scale-95"
+    >
+      <Globe size={20} strokeWidth={1.8} />
+      <span className="font-ui text-[13px] font-semibold">{t('lang.switchTo')}</span>
+    </button>
+  );
+}
+
 export function Header({ isMobile }: { isMobile: boolean }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
 
-  const cartCount = useCart(selectCartCount);
   const wishCount = useWishlist(selectWishCount);
+  const cartCount = useCart(selectCartCount);
   const openCart = useUI((s) => s.openCart);
 
   const onSearch = (value: string) => {
@@ -139,21 +157,21 @@ export function Header({ isMobile }: { isMobile: boolean }) {
         {!isMobile && (
           <nav className="flex gap-5 flex-1 justify-center">
             {LINKS.map((l) => (
-              <NavItem key={l.label} {...l} />
+              <NavItem key={l.labelKey} {...l} label={t(l.labelKey)} />
             ))}
           </nav>
         )}
 
         {!isMobile && (
           <div className="relative w-55 flex-none">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 flex">
+            <span className="absolute start-3 top-1/2 -translate-y-1/2 text-ink-400 flex">
               <Search size={20} strokeWidth={1.8} />
             </span>
             <input
               value={query}
               onChange={(e) => onSearch(e.target.value)}
-              placeholder="Search pieces…"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-full border-2 border-warm-200 bg-white font-ui text-sm outline-none transition-colors focus:border-pink-400"
+              placeholder={t('nav.searchPlaceholder')}
+              className="w-full ps-10 pe-3.5 py-2.5 rounded-full border-2 border-warm-200 bg-white font-ui text-sm outline-none transition-colors focus:border-pink-400"
             />
           </div>
         )}
@@ -161,13 +179,14 @@ export function Header({ isMobile }: { isMobile: boolean }) {
         <div
           className={cn(
             'flex items-center',
-            isMobile ? 'gap-1 ml-auto' : 'gap-1',
+            isMobile ? 'gap-1 ms-auto' : 'gap-1',
           )}
         >
+          <LanguageToggle />
           {isMobile && (
             <button
               type="button"
-              aria-label="Search"
+              aria-label={t('nav.search')}
               onClick={() => setSearchOpen((s) => !s)}
               className="border-0 bg-transparent cursor-pointer text-ink-500 flex p-2"
             >
@@ -177,7 +196,7 @@ export function Header({ isMobile }: { isMobile: boolean }) {
           {!isMobile && (
             <button
               type="button"
-              aria-label="Wishlist"
+              aria-label={t('nav.wishlist')}
               onClick={() => navigate('/wishlist')}
               className="relative border-0 bg-transparent cursor-pointer text-ink-500 flex p-2 rounded-full transition-all duration-200 hover:text-pink-500 hover:bg-pink-50 hover:scale-110 active:scale-95"
             >
@@ -185,33 +204,32 @@ export function Header({ isMobile }: { isMobile: boolean }) {
               <CountBadge count={wishCount} />
             </button>
           )}
-          <button
-            type="button"
-            aria-label="Open cart"
-            onClick={openCart}
-            className={cn(
-              'relative border-0 bg-transparent cursor-pointer text-ink-500 flex rounded-full transition-all duration-200 hover:text-pink-500 hover:bg-pink-50 hover:scale-110 active:scale-95',
-              isMobile ? 'p-2' : 'p-2',
-            )}
-          >
-            <ShoppingBag size={isMobile ? 22 : 20} strokeWidth={1.8} />
-            <CountBadge count={cartCount} />
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              aria-label={t('nav.cart')}
+              onClick={openCart}
+              className="relative border-0 bg-transparent cursor-pointer text-ink-500 flex p-2 rounded-full transition-all duration-200 hover:text-pink-500 hover:bg-pink-50 hover:scale-110 active:scale-95"
+            >
+              <ShoppingBag size={20} strokeWidth={1.8} />
+              <CountBadge count={cartCount} />
+            </button>
+          )}
         </div>
       </div>
 
       {isMobile && searchOpen && (
         <div className="px-4 pb-3 border-t border-warm-200">
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 flex">
+            <span className="absolute start-3 top-1/2 -translate-y-1/2 text-ink-400 flex">
               <Search size={20} strokeWidth={1.8} />
             </span>
             <input
               autoFocus
               value={query}
               onChange={(e) => onSearch(e.target.value)}
-              placeholder="Search pieces…"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-full border-2 border-pink-300 bg-white font-ui text-[15px] outline-none"
+              placeholder={t('nav.searchPlaceholder')}
+              className="w-full ps-10 pe-3.5 py-2.5 rounded-full border-2 border-pink-300 bg-white font-ui text-[15px] outline-none"
             />
           </div>
         </div>

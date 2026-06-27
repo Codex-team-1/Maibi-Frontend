@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Heart, Star, Check } from 'lucide-react';
+import { ChevronLeft, Heart, Check, Clock, Tag, Truck } from 'lucide-react';
 import { Badge, Button, Chip, QuantityStepper, Stars, Spinner, ErrorState } from '@/components/ui';
 import { useCart } from '@/store/useCart';
 import { useUI } from '@/store/useUI';
@@ -8,6 +8,7 @@ import { useWishlist } from '@/store/useWishlist';
 import { useLayoutContext } from '@/hooks/useLayoutContext';
 import { useAsync } from '@/hooks/useAsync';
 import { getProduct } from '@/api';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
@@ -16,10 +17,44 @@ const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
   New:      'gold',
 };
 
+function DiscountCountdown({ activeUntil }: { activeUntil: string }) {
+  const { t } = useI18n();
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calc = () => {
+      const diff = new Date(activeUntil).getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft(''); return; }
+      const h = Math.floor(diff / 3_600_000);
+      const m = Math.floor((diff % 3_600_000) / 60_000);
+      const s = Math.floor((diff % 60_000) / 1_000);
+      if (h >= 24) {
+        const days = Math.floor(h / 24);
+        setTimeLeft(t('product.daysLeft', { days, hours: h % 24 }));
+      } else {
+        const clock = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        setTimeLeft(t('product.timeLeft', { time: clock }));
+      }
+    };
+    calc();
+    const id = setInterval(calc, 1000);
+    return () => clearInterval(id);
+  }, [activeUntil, t]);
+
+  if (!timeLeft) return null;
+  return (
+    <span className="inline-flex items-center gap-1 text-rose-600 font-semibold text-xs">
+      <Clock size={12} className="shrink-0" />
+      {timeLeft}
+    </span>
+  );
+}
+
 export function Product() {
   const { id }      = useParams();
   const navigate    = useNavigate();
   const { isMobile } = useLayoutContext();
+  const { t }        = useI18n();
   const numericId   = Number(id);
 
   const { data: product, loading, error, apiError, reload } = useAsync(
@@ -49,7 +84,7 @@ export function Product() {
   if (loading) {
     return (
       <main className={cn('max-w-[1240px] mx-auto', isMobile ? 'pt-4 pb-25' : 'px-8 pt-6 pb-16')}>
-        <Spinner label="Loading piece…" />
+        <Spinner label={t('product.loadingPiece')} />
       </main>
     );
   }
@@ -61,7 +96,7 @@ export function Product() {
   if (error || !product) {
     return (
       <main className={cn('max-w-[1240px] mx-auto', isMobile ? 'pt-4 pb-25' : 'px-8 pt-6 pb-16')}>
-        <ErrorState message={error ?? 'Product not found.'} onRetry={reload} />
+        <ErrorState message={error ?? t('product.notFound')} onRetry={reload} />
       </main>
     );
   }
@@ -69,6 +104,9 @@ export function Product() {
   const photos    = (product.images ?? []).map((img) => img?.url).filter(Boolean) as string[];
   const safeIdx   = activePhoto < photos.length ? activePhoto : 0;
   const mainPhoto = photos[safeIdx];
+
+  const discount  = product.discount;
+  const hasDiscount = !!discount;
 
   const onAdd = () => {
     add(product, qty, size, color);
@@ -78,6 +116,9 @@ export function Product() {
   };
 
   const canAdd = product.inStock && product.stock > 0;
+
+  const ratingAvg   = product.rating?.ratingAvg   ?? 0;
+  const ratingCount = product.rating?.ratingCount ?? 0;
 
   return (
     <main className={cn('max-w-[1240px] mx-auto', isMobile ? 'pt-4 pb-25' : 'px-8 pt-6 pb-16')}>
@@ -89,7 +130,7 @@ export function Product() {
           isMobile ? 'mb-3.5 px-4' : 'mb-4.5',
         )}
       >
-        <ChevronLeft size={20} strokeWidth={1.8} /> Back to shop
+        <ChevronLeft size={20} strokeWidth={1.8} className="rtl:-scale-x-100" /> {t('common.backToShop')}
       </button>
 
       <div className={cn('grid items-start', isMobile ? 'grid-cols-1 gap-0' : 'grid-cols-2 gap-12')}>
@@ -151,10 +192,18 @@ export function Product() {
               </div>
             )}
 
-            {product.badgeLabel && (
-              <div className="absolute top-3.5 left-3.5">
+            {product.badgeLabel && !hasDiscount && (
+              <div className="absolute top-3.5 start-3.5">
                 <Badge variant={BADGE_VARIANT[product.badgeLabel] ?? 'gold'}>
-                  {product.badgeLabel}
+                  {t(`badge.${product.badgeLabel}` as TranslationKey)}
+                </Badge>
+              </div>
+            )}
+
+            {hasDiscount && (
+              <div className="absolute top-3.5 start-3.5">
+                <Badge variant="sale">
+                  <Tag size={11} /> -{discount.percent}%
                 </Badge>
               </div>
             )}
@@ -162,7 +211,7 @@ export function Product() {
             {!product.inStock && (
               <div className="absolute inset-0 bg-ink-900/40 flex items-center justify-center">
                 <span className="bg-white/90 text-ink-700 text-sm font-bold px-4 py-2 rounded-full">
-                  Sold out
+                  {t('common.soldOut')}
                 </span>
               </div>
             )}
@@ -180,20 +229,48 @@ export function Product() {
             {product.name}
           </h1>
 
-          <div className="mb-2">
-            <Stars rating={4} />
+          {/* Rating */}
+          <div className="mb-2 flex items-center gap-2">
+            <Stars rating={Math.round(ratingAvg)} />
+            {ratingCount > 0 ? (
+              <span className="text-xs text-ink-400">
+                {ratingAvg.toFixed(1)} ({t(ratingCount === 1 ? 'product.reviewOne' : 'product.reviewMany', { count: ratingCount })})
+              </span>
+            ) : (
+              <span className="text-xs text-ink-400">{t('product.noReviews')}</span>
+            )}
           </div>
 
+          {/* Price */}
           <div className="flex items-baseline gap-2 mb-3">
-            <span className={cn('font-bold text-pink-600', isMobile ? 'text-[22px]' : 'text-[26px]')}>
-              {product.price}
-            </span>
-            {!product.inStock ? (
-              <span className="text-sm font-semibold text-red-500">Out of stock</span>
-            ) : product.stock <= 5 ? (
-              <span className="text-sm font-semibold text-amber-600">Only {product.stock} left</span>
-            ) : null}
+            {hasDiscount ? (
+              <>
+                <span className={cn('font-bold text-rose-600', isMobile ? 'text-[22px]' : 'text-[26px]')}>
+                  {discount.discountedPrice}
+                </span>
+                <span className={cn('font-medium text-ink-400 line-through', isMobile ? 'text-base' : 'text-lg')}>
+                  {product.price}
+                </span>
+              </>
+            ) : (
+              <span className={cn('font-bold text-pink-600', isMobile ? 'text-[22px]' : 'text-[26px]')}>
+                {product.price}
+              </span>
+            )}
           </div>
+
+          {/* Discount savings callout — with the single countdown */}
+          {hasDiscount && (
+            <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded-xl px-3.5 py-2.5 mb-3.5">
+              <Tag size={14} className="text-rose-500 shrink-0" />
+              <p className="text-sm font-semibold text-rose-700">
+                {t('product.sale', { percent: discount.percent })}
+              </p>
+              <span className="ml-auto">
+                <DiscountCountdown activeUntil={discount.activeUntil} />
+              </span>
+            </div>
+          )}
 
           {product.description && (
             <p className={cn('text-ink-700 leading-relaxed my-3.5', isMobile ? 'text-sm' : 'text-base')}>
@@ -201,15 +278,41 @@ export function Product() {
             </p>
           )}
 
-          <div className="flex items-center gap-2 text-ink-500 text-[13px] border-stitch border-x-0 py-3 mb-4.5">
-            <Star size={15} className="text-gold" fill="var(--color-gold)" />
-            {product.inStock ? `${product.stock} in stock` : 'Currently unavailable'} · ships in 3–5 days
+          {/* Stock indicator */}
+          <div className="py-3 mb-4.5 space-y-2">
+            {product.inStock ? (() => {
+              const pct   = Math.min(100, Math.round((product.stock / 30) * 100));
+              const level = product.stock <= 3 ? 'critical' : product.stock <= 10 ? 'low' : 'ok';
+              const bar   = level === 'critical' ? 'bg-red-400' : level === 'low' ? 'bg-amber-400' : 'bg-emerald-400';
+              const label = level === 'critical'
+                ? t('product.onlyLeft', { count: product.stock })
+                : level === 'low'
+                ? t('product.leftSellingFast', { count: product.stock })
+                : t('product.inStockCount', { count: product.stock });
+              const labelColor = level === 'critical' ? 'text-red-600' : level === 'low' ? 'text-amber-600' : 'text-emerald-700';
+              return (
+                <>
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className={cn('font-semibold', labelColor)}>{label}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-warm-100 rounded-full overflow-hidden">
+                    <div className={cn('h-full rounded-full transition-all', bar)} style={{ width: `${pct}%` }} />
+                  </div>
+                </>
+              );
+            })() : (
+              <span className="text-sm font-semibold text-ink-400">{t('product.currentlyUnavailable')}</span>
+            )}
+            <div className="flex items-center gap-1.5 text-ink-400 text-xs">
+              <Truck size={12} className="shrink-0" />
+              {t('product.shipsIn')}
+            </div>
           </div>
 
           {/* Sizes */}
           {(product.sizes?.length ?? 0) > 0 && (
             <>
-              <div className="font-semibold text-ink-900 mb-2 text-[15px]">Size</div>
+              <div className="font-semibold text-ink-900 mb-2 text-[15px]">{t('product.size')}</div>
               <div className="flex gap-2 mb-5 flex-wrap">
                 {product.sizes.map((s) => (
                   <Chip key={s} selected={size === s} onClick={() => setSize(s)}>{s}</Chip>
@@ -222,7 +325,7 @@ export function Product() {
           {(product.colors?.length ?? 0) > 0 && (
             <>
               <div className="font-semibold text-ink-900 mb-2 text-[15px]">
-                Color <span className="font-normal text-ink-500 text-sm">— {color || 'select one'}</span>
+                {t('product.color')} <span className="font-normal text-ink-500 text-sm">— {color || t('product.selectColor')}</span>
               </div>
               <div className="flex gap-2 mb-5 flex-wrap">
                 {product.colors.map((c) => (
@@ -237,7 +340,7 @@ export function Product() {
                         : 'border-warm-200 text-ink-600 hover:border-pink-200',
                     )}
                   >
-                    {color === c && <Check size={12} className="inline mr-1" />}
+                    {color === c && <Check size={12} className="inline me-1" />}
                     {c}
                   </button>
                 ))}
@@ -246,16 +349,16 @@ export function Product() {
           )}
 
           <div className="flex gap-3 items-center">
-            <QuantityStepper value={qty} onChange={setQty} />
+            <QuantityStepper value={qty} onChange={setQty} max={product.stock} />
             <div className="flex-1">
               <Button full size={isMobile ? 'md' : 'lg'} onClick={onAdd} disabled={!canAdd}>
-                {!product.inStock ? 'Sold out' : added ? '♥ Added' : 'Add to bag'}
+                {!product.inStock ? t('common.soldOut') : added ? t('product.added') : t('product.addToBag')}
               </Button>
             </div>
             <Button
               variant="secondary"
               size={isMobile ? 'md' : 'lg'}
-              aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
+              aria-label={liked ? t('product.removeFromWishlist') : t('product.addToWishlist')}
               onClick={() => toggle(product.id)}
               className="!px-4 grid place-items-center"
             >

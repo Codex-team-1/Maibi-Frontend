@@ -19,21 +19,22 @@ import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { useLayoutContext } from "@/hooks/useLayoutContext";
 import { useAsync } from "@/hooks/useAsync";
 import { getFeaturedProducts, getNewProducts } from "@/api";
+import { useI18n, type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import heroImage from "../assets/hero2.png";
 import maibiHero from "../assets/hero2.png";
 import ourStoryImage from "../assets/our-story.png";
 import { FeatureItem } from "@/components/ui/FeatureItem";
 
-const MARQUEE_ITEMS: Array<[string, string, string]> = [
-  ["✶", "Hand-embroidered", "var(--color-gold)"],
-  ["♡", "Limited edition", "var(--color-pink-500)"],
-  ["◇", "Slow fashion", "var(--color-ink-400)"],
-  ["✶", "Made in Algeria", "var(--color-gold)"],
-  ["♡", "Custom orders", "var(--color-pink-500)"],
-  ["◇", "One of a kind", "var(--color-ink-400)"],
-  ["✶", "Algerian artisans", "var(--color-gold)"],
-  ["◇", "Wearable art", "var(--color-ink-400)"],
+const MARQUEE_ITEMS: Array<[string, TranslationKey, string]> = [
+  ["✶", "home.marqueeHandEmbroidered", "var(--color-gold)"],
+  ["♡", "home.marqueeLimitedEdition", "var(--color-pink-500)"],
+  ["◇", "home.marqueeSlowFashion", "var(--color-ink-400)"],
+  ["✶", "home.marqueeMadeInAlgeria", "var(--color-gold)"],
+  ["♡", "home.marqueeCustomOrders", "var(--color-pink-500)"],
+  ["◇", "home.marqueeOneOfAKind", "var(--color-ink-400)"],
+  ["✶", "home.marqueeAlgerianArtisans", "var(--color-gold)"],
+  ["◇", "home.marqueeWearableArt", "var(--color-ink-400)"],
 ];
 
 function SectionTitle({
@@ -76,7 +77,7 @@ function SectionTitle({
             isMobile ? "text-[13px]" : "text-sm",
           )}
         >
-          {action} <ArrowRight size={16} />
+          {action} <ArrowRight size={16} className="rtl:-scale-x-100" />
         </button>
       )}
     </div>
@@ -86,6 +87,7 @@ function SectionTitle({
 export function Home() {
   const navigate = useNavigate();
   const { isMobile } = useLayoutContext();
+  const { t } = useI18n();
   const px = isMobile ? "px-4" : "px-8";
 
   const featured = useAsync((signal) => getFeaturedProducts(4, signal), []);
@@ -143,13 +145,13 @@ export function Home() {
                 className="block font-bold text-pink-500"
                 style={{ fontSize: 46, lineHeight: 0.95 }}
               >
-                Maibi,
+                {t("home.heroBrand")}
               </span>
               <span
                 className="block font-medium text-ink-900"
                 style={{ fontSize: 36, lineHeight: 1.05 }}
               >
-                crafted with soul.
+                {t("home.heroCraftedWithSoul")}
               </span>
             </h1>
 
@@ -161,9 +163,9 @@ export function Home() {
 
             {/* Subtext */}
             <p className="mt-4 text-[14px] leading-[1.7] text-ink-500 m-0">
-              Handmade fashion by Algerian artisans.
+              {t("home.heroSubtitleA")}
               <br />
-              Limited pieces. Timeless details. Made to be unique.
+              {t("home.heroSubtitleB")}
             </p>
 
             {/* CTA buttons */}
@@ -171,11 +173,11 @@ export function Home() {
               <button
                 type="button"
                 onClick={() => navigate("/shop")}
-                className="inline-flex items-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold text-[14px] pl-6 pr-2.5 py-3 transition-colors shadow-brand"
+                className="inline-flex items-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold text-[14px] ps-6 pe-2.5 py-3 transition-colors shadow-brand"
               >
-                Shop the drop
+                {t("home.shopTheDrop")}
                 <span className="grid place-items-center size-7 rounded-full bg-white/20">
-                  <ArrowRight className="size-[15px]" />
+                  <ArrowRight className="size-[15px] rtl:-scale-x-100" />
                 </span>
               </button>
 
@@ -185,7 +187,7 @@ export function Home() {
                 className="inline-flex items-center gap-2 rounded-full border border-pink-300 text-pink-600 font-semibold text-[14px] px-5 py-3 transition-colors bg-white/70"
               >
                 <Scissors className="size-[13px]" />
-                Request custom piece
+                {t("home.requestCustomPiece")}
               </button>
             </div>
 
@@ -207,8 +209,9 @@ export function Home() {
                 ))}
               </div>
               <p className="text-[13px] text-ink-500 flex items-center gap-1.5 m-0">
-                Loved by <span className="font-bold text-ink-900">1350+</span>{" "}
-                women
+                {t("home.lovedByPrefix")}{" "}
+                <span className="font-bold text-ink-900">1350+</span>{" "}
+                {t("home.lovedBySuffix")}
                 <Heart className="size-3.5 fill-pink-500 text-pink-500" />
               </p>
             </div>
@@ -218,23 +221,23 @@ export function Home() {
               <div className="grid grid-cols-2 gap-4">
                 <FeatureItem
                   icon={<HeartHandshake strokeWidth={1.8} />}
-                  title="Handmade"
-                  description="crafted with love"
+                  title={t("home.featHandmade")}
+                  description={t("home.featHandmadeDesc")}
                 />
                 <FeatureItem
                   icon={<Flower2 strokeWidth={1.8} />}
-                  title="Cultural heritage"
-                  description="in every detail"
+                  title={t("home.featHeritage")}
+                  description={t("home.featHeritageDesc")}
                 />
                 <FeatureItem
                   icon={<Shirt strokeWidth={1.8} />}
-                  title="Limited pieces"
-                  description="never mass produced"
+                  title={t("home.featLimited")}
+                  description={t("home.featLimitedDesc")}
                 />
                 <FeatureItem
                   icon={<Package strokeWidth={1.8} />}
-                  title="Carefully packaged"
-                  description="delivered with care"
+                  title={t("home.featPackaged")}
+                  description={t("home.featPackagedDesc")}
                 />
               </div>
             </div>
@@ -247,18 +250,21 @@ export function Home() {
           ══════════════════════════════════════════ */}
       {!isMobile && (
         <section className="max-w-full mx-auto px-6">
+          {/* dir="ltr" on the whole hero card so photo, gradient, and content
+              always use physical left/right regardless of document RTL direction */}
           <div
+            dir="ltr"
             className="relative overflow-hidden rounded-[28px]"
             style={{ minHeight: 520 }}
           >
-            {/* Full-bleed background photo — maibi-hero.png already has the limited edition stamp */}
+            {/* Full-bleed background photo */}
             <img
               src={maibiHero}
               alt="Maibi handmade fashion"
               className="absolute inset-0 h-[720px] w-[1597px] object-cover object-center"
             />
 
-            {/* Left-to-right gradient: opaque cream → transparent, keeps leaves visible on far left */}
+            {/* Left-to-right gradient: opaque cream on the left (white space) → transparent */}
             <div
               className="absolute inset-0 z-10 pointer-events-none"
               style={{
@@ -267,21 +273,13 @@ export function Home() {
               }}
             />
 
-            {/* Content — sits over the gradient */}
+            {/* Content — always on the physical left over the white/gradient side.
+                dir="auto" inside so Arabic text in the labels still aligns right-to-left. */}
             <div
+              dir="auto"
               className="relative z-20 flex flex-col justify-center px-14 py-10"
               style={{ maxWidth: "56%" }}
             >
-              {/* MADE IN ALGERIA pill */}
-              {/* <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/90 px-4 py-[7px] shadow-sm mb-6">
-                <span className="grid place-items-center size-[22px] rounded-full bg-pink-100">
-                  <Flower2 className="size-[11px] text-pink-500" strokeWidth={2.4} />
-                </span>
-                <span className="text-[11.5px] font-bold tracking-[0.15em] text-pink-600">
-                  MADE IN ALGERIA
-                </span>
-              </div> */}
-
               {/* Heading */}
               <h1 className="m-0 font-display tracking-tight">
                 <span
@@ -291,7 +289,7 @@ export function Home() {
                     lineHeight: 0.92,
                   }}
                 >
-                  Maibi,
+                  {t("home.heroBrand")}
                 </span>
                 <span
                   className="block font-medium text-ink-900"
@@ -300,11 +298,11 @@ export function Home() {
                     lineHeight: 1.0,
                   }}
                 >
-                  crafted with soul.
+                  {t("home.heroCraftedWithSoul")}
                 </span>
               </h1>
 
-              {/* accent */}
+              {/* accent line */}
               <div className="mt-5 flex items-center gap-2">
                 <div className="h-[2.5px] w-12 rounded-full bg-pink-400" />
                 <span className="text-pink-400 text-[10px]">✦</span>
@@ -312,9 +310,9 @@ export function Home() {
 
               {/* Subtext */}
               <p className="mt-5 text-[15.5px] leading-[1.7] text-ink-600 max-w-[400px]">
-                Handmade fashion by Algerian artisans.
+                {t("home.heroSubtitleA")}
                 <br />
-                Limited pieces. Timeless details. Made to be unique.
+                {t("home.heroSubtitleB")}
               </p>
 
               {/* CTA buttons */}
@@ -322,9 +320,9 @@ export function Home() {
                 <button
                   type="button"
                   onClick={() => navigate("/shop")}
-                  className="inline-flex items-center gap-3 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold text-[15px] pl-7 pr-3 py-3.5 transition-colors shadow-brand"
+                  className="inline-flex items-center gap-3 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold text-[15px] ps-7 pe-3 py-3.5 transition-colors shadow-brand"
                 >
-                  Shop the drop
+                  {t("home.shopTheDrop")}
                   <span className="grid place-items-center size-5 rounded-full bg-white/20">
                     <ArrowRight className="size-[17px]" />
                   </span>
@@ -336,7 +334,7 @@ export function Home() {
                   className="inline-flex items-center gap-2 rounded-full border border-pink-300 hover:bg-pink-50 text-pink-600 font-semibold text-[15px] px-6 py-3.5 transition-colors bg-white/60"
                 >
                   <Scissors className="size-[17px]" />
-                  Request custom piece
+                  {t("home.requestCustomPiece")}
                 </button>
               </div>
 
@@ -358,43 +356,47 @@ export function Home() {
                   ))}
                 </div>
                 <p className="text-[13.5px] text-ink-600 flex items-center gap-1.5 m-0">
-                  Loved by <span className="font-bold text-ink-900">1350+</span>{" "}
-                  women
+                  {t("home.lovedByPrefix")}{" "}
+                  <span className="font-bold text-ink-900">1350+</span>{" "}
+                  {t("home.lovedBySuffix")}
                   <Heart className="size-3.5 fill-pink-500 text-pink-500" />
                 </p>
               </div>
             </div>
 
-            {/* Bottom features bar — pinned to the bottom of the card */}
+            {/* Bottom features bar */}
             <div className="absolute bottom-0 inset-x-0 z-20">
               <div className="mx-5 mb-6 rounded-[20px] border border-pink-200/60 bg-white/80 backdrop-blur-sm px-8 py-5 shadow-sm ring-1 ring-pink-100/60">
-                <div className="grid grid-cols-4 divide-x divide-pink-200/60">
-                  <div className="pr-6 pl-2">
+                <div
+                  dir="auto"
+                  className="grid grid-cols-4 divide-x divide-pink-200/60"
+                >
+                  <div className="pe-6 ps-2">
                     <FeatureItem
                       icon={<HeartHandshake strokeWidth={1.8} />}
-                      title="Handmade"
-                      description="crafted with love"
+                      title={t("home.featHandmade")}
+                      description={t("home.featHandmadeDesc")}
                     />
                   </div>
                   <div className="px-6">
                     <FeatureItem
                       icon={<Flower2 strokeWidth={1.8} />}
-                      title="Cultural heritage"
-                      description="in every detail"
+                      title={t("home.featHeritage")}
+                      description={t("home.featHeritageDesc")}
                     />
                   </div>
                   <div className="px-6">
                     <FeatureItem
                       icon={<Shirt strokeWidth={1.8} />}
-                      title="Limited pieces"
-                      description="never mass produced"
+                      title={t("home.featLimited")}
+                      description={t("home.featLimitedDesc")}
                     />
                   </div>
-                  <div className="pl-6 pr-2">
+                  <div className="ps-6 pe-2">
                     <FeatureItem
                       icon={<Package strokeWidth={1.8} />}
-                      title="Carefully packaged"
-                      description="delivered with care"
+                      title={t("home.featPackaged")}
+                      description={t("home.featPackagedDesc")}
                     />
                   </div>
                 </div>
@@ -414,7 +416,7 @@ export function Home() {
         <div className="marquee-track flex w-max whitespace-nowrap">
           {[0, 1].map((rep) => (
             <div key={rep} className="flex items-center">
-              {MARQUEE_ITEMS.map(([ic, label, col], i) => (
+              {MARQUEE_ITEMS.map(([ic, labelKey, col], i) => (
                 <span key={i} className="inline-flex items-center gap-2.5 px-8">
                   <span style={{ color: col, fontSize: 14 }}>{ic}</span>
                   <span
@@ -423,7 +425,7 @@ export function Home() {
                       isMobile ? "text-[13px]" : "text-sm",
                     )}
                   >
-                    {label}
+                    {t(labelKey)}
                   </span>
                 </span>
               ))}
@@ -441,12 +443,12 @@ export function Home() {
         )}
       >
         <SectionTitle
-          sub="Our most-loved pieces this season"
-          action="View all"
+          sub={t("home.featuredSub")}
+          action={t("home.viewAll")}
           onAction={() => navigate("/shop")}
           isMobile={isMobile}
         >
-          Featured pieces
+          {t("home.featuredPieces")}
         </SectionTitle>
         {featured.loading ? (
           <Spinner />
@@ -483,7 +485,7 @@ export function Home() {
               isMobile ? "text-[15px]" : "text-[17px]",
             )}
           >
-            Our Story
+            {t("home.ourStory")}
           </span>
           <span
             className={cn("text-pink-300 select-none", isMobile ? "text-[10px]" : "text-xs")}
@@ -528,10 +530,10 @@ export function Home() {
               {/* floating quote */}
               <div className="absolute bottom-5 inset-x-5 bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3.5 border border-white/15">
                 <p className="font-display text-white text-[13.5px] italic leading-relaxed m-0">
-                  "Each stitch is a word. Each garment is a story."
+                  {t("home.storyQuoteMobile")}
                 </p>
                 <p className="text-white/55 text-[11px] font-semibold tracking-widest uppercase mt-1.5 m-0">
-                  Maibi artisans, Algeria
+                  {t("home.storyAuthor")}
                 </p>
               </div>
             </div>
@@ -541,29 +543,26 @@ export function Home() {
               <div className="inline-flex items-center gap-2 mb-4 rounded-full px-3.5 py-1.5 bg-pink-500/20 border border-pink-400/30">
                 <Gem className="size-3.5 text-pink-300" strokeWidth={1.8} />
                 <span className="text-[11px] font-bold tracking-[0.12em] text-pink-300 uppercase">
-                  Our Story
+                  {t("home.ourStory")}
                 </span>
               </div>
 
               <h2 className="font-display font-semibold text-white m-0 mb-4 leading-[1.1] text-[28px]">
-                Craft handed down
+                {t("home.storyHeadingA")}
                 <br />
-                through generations
+                {t("home.storyHeadingB")}
               </h2>
 
               <p className="text-white/65 text-[13.5px] leading-[1.8] m-0 mb-5">
-                Maibi was born from a love of Algerian embroidery — passed from
-                grandmother to granddaughter in Algeria. Every piece is
-                hand-stitched by women artisans who have spent years mastering
-                the craft.
+                {t("home.storyBodyMobile")}
               </p>
 
               {/* Stats row */}
               <div className="flex gap-5 mb-6 pb-5 border-b border-white/10">
                 {[
-                  ["5+", "Artisans", <Users key="u" className="size-3.5" />],
-                  ["100+", "Pieces", <Gem key="g" className="size-3.5" />],
-                  ["3", "Cities", <MapPin key="m" className="size-3.5" />],
+                  ["5+", t("home.statArtisans"), <Users key="u" className="size-3.5" />],
+                  ["100+", t("home.statPieces"), <Gem key="g" className="size-3.5" />],
+                  ["3", t("home.statCities"), <MapPin key="m" className="size-3.5" />],
                 ].map(([n, l, icon]) => (
                   <div key={String(l)} className="flex-1">
                     <div className="font-display font-bold text-pink-400 text-[22px] leading-none mb-0.5">
@@ -582,8 +581,8 @@ export function Home() {
                 onClick={() => navigate("/shop")}
                 className="w-full inline-flex items-center justify-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-500 text-white font-semibold text-[14px] py-3.5 transition-colors"
               >
-                Discover the collection
-                <ArrowRight className="size-[15px]" />
+                {t("home.discoverCollection")}
+                <ArrowRight className="size-[15px] rtl:-scale-x-100" />
               </button>
             </div>
           </div>
@@ -627,8 +626,7 @@ export function Home() {
                     "
                   </div>
                   <p className="font-display text-white text-[16px] italic leading-relaxed m-0">
-                    Each stitch is a word. Each garment is a story told with
-                    thread.
+                    {t("home.storyQuoteDesktop")}
                   </p>
                   <div className="mt-3 flex items-center gap-2.5">
                     <div className="size-7 rounded-full bg-pink-500/30 border border-pink-400/40 grid place-items-center">
@@ -638,7 +636,7 @@ export function Home() {
                       />
                     </div>
                     <span className="text-white/55 text-[11.5px] font-semibold tracking-[0.08em] uppercase">
-                      Maibi artisans, Algeria
+                      {t("home.storyAuthor")}
                     </span>
                   </div>
                 </div>
@@ -657,23 +655,20 @@ export function Home() {
                 <div className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 bg-pink-500/20 border border-pink-400/30">
                   <Gem className="size-3.5 text-pink-300" strokeWidth={1.8} />
                   <span className="text-[11px] font-bold tracking-[0.14em] text-pink-300 uppercase">
-                    Our Story
+                    {t("home.ourStory")}
                   </span>
                 </div>
 
                 {/* heading */}
                 <h2 className="font-display font-semibold text-white m-0 text-[40px] leading-[1.08]">
-                  Craft handed down
+                  {t("home.storyHeadingA")}
                   <br />
-                  through generations
+                  {t("home.storyHeadingB")}
                 </h2>
 
                 {/* body */}
                 <p className="text-white/65 text-[15px] leading-[1.85] m-0">
-                  Maibi was born from a love of Algerian embroidery — the kind
-                  passed from grandmother to granddaughter in Algeria, Every
-                  piece in our collection is hand-stitched by women artisans who
-                  have spent years mastering the craft.
+                  {t("home.storyBodyDesktop")}
                 </p>
 
                 {/* value props */}
@@ -683,15 +678,15 @@ export function Home() {
                       icon: (
                         <ShieldCheck className="size-4" strokeWidth={1.8} />
                       ),
-                      text: "Limited runs — slow, intentional, never mass-produced",
+                      text: t("home.storyProp1"),
                     },
                     {
                       icon: <MapPin className="size-4" strokeWidth={1.8} />,
-                      text: "Rooted in 3 Algerian cities, each with its own embroidery tradition",
+                      text: t("home.storyProp2"),
                     },
                     {
                       icon: <Users className="size-4" strokeWidth={1.8} />,
-                      text: "5+ women artisans, 100+ one-of-a-kind pieces and counting",
+                      text: t("home.storyProp3"),
                     },
                   ].map(({ icon, text }) => (
                     <div key={text} className="flex items-start gap-3">
@@ -708,13 +703,13 @@ export function Home() {
                 {/* Stats */}
                 <div className="flex gap-8 py-5 border-t border-white/10">
                   {[
-                    ["5+", "Artisans", <Users key="u" className="size-3.5" />],
+                    ["5+", t("home.statArtisans"), <Users key="u" className="size-3.5" />],
                     [
                       "100+",
-                      "Pieces made",
+                      t("home.statPiecesMade"),
                       <Gem key="g" className="size-3.5" />,
                     ],
-                    ["3", "Cities", <MapPin key="m" className="size-3.5" />],
+                    ["3", t("home.statCities"), <MapPin key="m" className="size-3.5" />],
                   ].map(([n, l, icon]) => (
                     <div key={String(l)}>
                       <div className="font-display font-bold text-pink-400 text-[28px] leading-none mb-1">
@@ -733,17 +728,17 @@ export function Home() {
                   <button
                     type="button"
                     onClick={() => navigate("/shop")}
-                    className="inline-flex items-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-500 text-white font-semibold text-[15px] pl-7 pr-5 py-3.5 transition-colors"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-pink-600 hover:bg-pink-500 text-white font-semibold text-[15px] ps-7 pe-5 py-3.5 transition-colors"
                   >
-                    Discover the collection
-                    <ArrowRight className="size-[16px]" />
+                    {t("home.discoverCollection")}
+                    <ArrowRight className="size-[16px] rtl:-scale-x-100" />
                   </button>
                   <button
                     type="button"
                     onClick={() => navigate("/custom-order")}
                     className="inline-flex items-center gap-2 rounded-full border border-white/20 hover:border-white/40 text-white/70 hover:text-white font-semibold text-[14px] px-6 py-3.5 transition-colors"
                   >
-                    Custom order
+                    {t("home.customOrder")}
                   </button>
                 </div>
               </div>
@@ -761,12 +756,12 @@ export function Home() {
         )}
       >
         <SectionTitle
-          sub="Fresh from our artisans — just arrived"
-          action="Shop all"
+          sub={t("home.newArrivalsSub")}
+          action={t("home.shopAll")}
           onAction={() => navigate("/shop")}
           isMobile={isMobile}
         >
-          New arrivals
+          {t("home.newArrivals")}
         </SectionTitle>
         {newArrivals.loading ? (
           <Spinner />
@@ -808,7 +803,7 @@ export function Home() {
             className="font-script text-pink-300"
             style={{ fontSize: isMobile ? 18 : 22 }}
           >
-            Bespoke service
+            {t("home.bespokeService")}
           </div>
           <h2
             className={cn(
@@ -816,9 +811,9 @@ export function Home() {
               isMobile ? "text-3xl" : "text-5xl",
             )}
           >
-            Your vision,
+            {t("home.yourVisionA")}
             <br />
-            crafted by hand
+            {t("home.yourVisionB")}
           </h2>
           <p
             className={cn(
@@ -826,17 +821,15 @@ export function Home() {
               isMobile ? "text-sm" : "text-[17px]",
             )}
           >
-            Can't find exactly what you're looking for? Send us a photo and
-            describe your dream piece — our artisans will bring it to life,
-            stitch by stitch.
+            {t("home.bannerBody")}
           </p>
           <div className="flex gap-3 flex-wrap justify-center">
             <Button
               size={isMobile ? "md" : "lg"}
               onClick={() => navigate("/custom-order")}
-              iconRight={<ArrowRight size={18} />}
+              iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}
             >
-              Start your custom order
+              {t("home.startCustomOrder")}
             </Button>
             <Button
               size={isMobile ? "md" : "lg"}
@@ -844,23 +837,23 @@ export function Home() {
               className="text-white/60 border-[1.5px] border-white/20"
               onClick={() => navigate("/shop")}
             >
-              Browse ready-made
+              {t("home.browseReadyMade")}
             </Button>
           </div>
           <div className="flex gap-7 mt-2">
             {[
-              ["No upfront payment", "Pay after quote"],
-              ["48h response", "Fast turnaround"],
-              ["WhatsApp support", "Direct with artisans"],
-            ].map(([t, s]) => (
-              <div key={t} className="text-center">
+              [t("home.bannerNoPayment"), t("home.bannerNoPaymentSub")],
+              [t("home.bannerResponse"), t("home.bannerResponseSub")],
+              [t("home.bannerWhatsapp"), t("home.bannerWhatsappSub")],
+            ].map(([title, s]) => (
+              <div key={title} className="text-center">
                 <div
                   className={cn(
                     "font-bold text-white/85",
                     isMobile ? "text-xs" : "text-[13px]",
                   )}
                 >
-                  {t}
+                  {title}
                 </div>
                 <div className="text-[11px] text-white/45 mt-0.5">{s}</div>
               </div>

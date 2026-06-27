@@ -8,11 +8,13 @@ import { useLayoutContext } from '@/hooks/useLayoutContext';
 import { useAsync } from '@/hooks/useAsync';
 import { getProduct } from '@/api';
 import { ApiError } from '@/lib/api';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 export function Wishlist() {
   const navigate = useNavigate();
   const { isMobile } = useLayoutContext();
+  const { t } = useI18n();
   const ids = useWishlist((s) => s.ids);
   const clear = useWishlist((s) => s.clear);
 
@@ -51,30 +53,30 @@ export function Wishlist() {
             isMobile ? 'text-3xl' : 'text-[40px]',
           )}
         >
-          Saved pieces
+          {t('wishlist.title')}
         </h1>
         {items.length > 0 && (
           <span className="text-ink-500 text-sm">
-            {items.length} piece{items.length !== 1 ? 's' : ''}
+            {t(items.length === 1 ? 'shop.countOne' : 'shop.countMany', { count: items.length })}
           </span>
         )}
       </div>
 
       {loading && ids.length > 0 ? (
-        <Spinner label="Loading your saved pieces…" />
+        <Spinner label={t('wishlist.loading')} />
       ) : items.length === 0 ? (
         <div className="text-center py-20 px-6">
           <div className="w-17 h-17 rounded-full bg-pink-50 grid place-items-center mx-auto mb-4.5 border-2 border-dashed border-pink-200 text-ink-400">
             <Heart size={26} strokeWidth={1.8} />
           </div>
           <div className="font-display text-2xl font-semibold text-ink-900 mb-2">
-            Your wishlist is empty
+            {t('wishlist.emptyTitle')}
           </div>
           <p className="text-ink-500 max-w-[280px] mx-auto mb-5.5 text-sm">
-            Heart a piece while browsing and it'll appear here.
+            {t('wishlist.emptyBody')}
           </p>
-          <Button onClick={() => navigate('/shop')} iconRight={<ArrowRight size={18} />}>
-            Discover pieces
+          <Button onClick={() => navigate('/shop')} iconRight={<ArrowRight size={18} className="rtl:-scale-x-100" />}>
+            {t('wishlist.discoverPieces')}
           </Button>
         </div>
       ) : (
@@ -95,7 +97,7 @@ export function Wishlist() {
                     size="sm"
                     onClick={() => navigate(`/product/${p.id}`)}
                   >
-                    Add to bag
+                    {t('wishlist.addToBag')}
                   </Button>
                 </div>
               </div>
@@ -103,14 +105,14 @@ export function Wishlist() {
           </div>
           <div className="border-t border-dashed border-warm-300 pt-5 flex justify-between items-center flex-wrap gap-2.5">
             <span className="text-ink-500 text-[13px]">
-              Items saved won't be reserved — limited editions go fast.
+              {t('wishlist.notReserved')}
             </span>
             <Button
               variant="ghost"
               onClick={clear}
               className="text-ink-400 text-[13px]"
             >
-              Clear wishlist
+              {t('wishlist.clear')}
             </Button>
           </div>
         </>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Tag } from 'lucide-react';
 import type { Product } from '@/types';
 import { Badge, Button, Stars } from '@/components/ui';
 import { useWishlist } from '@/store/useWishlist';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 interface ProductCardProps {
@@ -20,13 +21,17 @@ const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
 
 export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [hover, setHover] = useState(false);
   const liked  = useWishlist((s) => s.ids.includes(product.id));
   const toggle = useWishlist((s) => s.toggle);
 
-  const open    = () => navigate(`/product/${product.id}`);
-  const compact = isMobile || isTablet;
-  const image   = product.images?.[0]?.url;
+  const open       = () => navigate(`/product/${product.id}`);
+  const compact    = isMobile || isTablet;
+  const image      = product.images?.[0]?.url;
+  const discount   = product.discount;
+  const hasDiscount = !!discount;
+  const ratingAvg  = product.rating?.ratingAvg ?? 0;
 
   return (
     <div
@@ -55,28 +60,34 @@ export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
           )}
         </div>
 
-        {product.badgeLabel && (
-          <div className="absolute top-2.5 left-2.5">
-            <Badge variant={BADGE_VARIANT[product.badgeLabel] ?? 'gold'}>
-              {product.badgeLabel}
+        {hasDiscount ? (
+          <div className="absolute top-2.5 start-2.5">
+            <Badge variant="sale">
+              <Tag size={10} /> -{discount.percent}%
             </Badge>
           </div>
-        )}
+        ) : product.badgeLabel ? (
+          <div className="absolute top-2.5 start-2.5">
+            <Badge variant={BADGE_VARIANT[product.badgeLabel] ?? 'gold'}>
+              {t(`badge.${product.badgeLabel}` as TranslationKey)}
+            </Badge>
+          </div>
+        ) : null}
 
         {!product.inStock && (
           <div className="absolute inset-0 bg-ink-900/40 flex items-center justify-center">
             <span className="bg-white/90 text-ink-700 text-xs font-bold px-3 py-1 rounded-full">
-              Sold out
+              {t('common.soldOut')}
             </span>
           </div>
         )}
 
         <button
           type="button"
-          aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-label={liked ? t('product.removeFromWishlist') : t('product.addToWishlist')}
           onClick={(e) => { e.stopPropagation(); toggle(product.id); }}
           className={cn(
-            'absolute top-2.5 right-2.5 rounded-full border-0 cursor-pointer',
+            'absolute top-2.5 end-2.5 rounded-full border-0 cursor-pointer',
             'bg-white/90 backdrop-blur-sm shadow-sm grid place-items-center',
             isMobile ? 'w-8 h-8' : 'w-9 h-9',
             liked ? 'text-pink-500' : 'text-ink-400',
@@ -94,7 +105,7 @@ export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
             }}
           >
             <Button full size="sm" onClick={(e) => { e.stopPropagation(); open(); }}>
-              View piece
+              {t('product.viewPiece')}
             </Button>
           </div>
         )}
@@ -104,14 +115,23 @@ export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
         <div className={cn('font-semibold text-ink-900', compact ? 'text-sm' : 'text-base')}>
           {product.name}
         </div>
-        <div className="flex gap-1.5 items-baseline mt-0.5">
-          <span className={cn('font-bold text-pink-600', compact ? 'text-sm' : 'text-base')}>
-            {product.price}
-          </span>
+        <div className="flex gap-1.5 items-baseline mt-0.5 flex-wrap">
+          {hasDiscount ? (
+            <>
+              <span className={cn('font-bold text-rose-600', compact ? 'text-sm' : 'text-base')}>
+                {discount.discountedPrice}
+              </span>
+              <span className="text-xs text-ink-400 line-through">{product.price}</span>
+            </>
+          ) : (
+            <span className={cn('font-bold text-pink-600', compact ? 'text-sm' : 'text-base')}>
+              {product.price}
+            </span>
+          )}
         </div>
         {!isMobile && (
           <div className="mt-1">
-            <Stars rating={4} />
+            <Stars rating={Math.round(ratingAvg)} />
           </div>
         )}
       </div>

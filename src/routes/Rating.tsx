@@ -8,13 +8,19 @@ import { Button, Input, StarRating } from '@/components/ui';
 import { useConfig } from '@/store/useConfig';
 import { createReview } from '@/api';
 import { ApiError } from '@/lib/api';
+import { useI18n, type TFn, type TranslationKey } from '@/i18n';
 import { ratingSchema, type RatingForm } from './rating/schema';
+
+/** Resolve a zod error message that is stored as a translation key. */
+const tErr = (t: TFn, msg?: string): string | undefined =>
+  msg ? t(msg as TranslationKey) : undefined;
 
 export function Rating() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const orderCode = params.get('order') ?? undefined;
   const { wilayas } = useConfig();
+  const { t } = useI18n();
 
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -45,7 +51,7 @@ export function Rating() {
       setSubmitted(true);
     } catch (err) {
       setServerError(
-        err instanceof ApiError ? err.message : 'Something went wrong. Please try again.',
+        err instanceof ApiError ? err.message : t('rating.genericError'),
       );
     }
   };
@@ -71,7 +77,7 @@ export function Rating() {
           {/* Close */}
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t('rating.close')}
             onClick={close}
             className="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/80 text-ink-500 transition-colors hover:bg-warm-100 hover:text-ink-900 cursor-pointer"
           >
@@ -88,10 +94,10 @@ export function Rating() {
                   <Star size={28} strokeWidth={2} fill="white" />
                 </div>
                 <h1 className="font-display text-3xl font-semibold leading-tight">
-                  Rate your order
+                  {t('rating.title')}
                 </h1>
                 <p className="mx-auto mt-1.5 max-w-[320px] text-sm text-white/90">
-                  Your feedback helps Maibi & our artisans keep improving. It only takes a minute. 🌸
+                  {t('rating.subtitle')}
                 </p>
               </div>
 
@@ -106,34 +112,34 @@ export function Rating() {
                     )}
                   />
                   {errors.rating && (
-                    <span className="text-xs text-rose-red">{errors.rating.message}</span>
+                    <span className="text-xs text-rose-red">{tErr(t, errors.rating.message)}</span>
                   )}
                 </div>
 
                 <Input
-                  label="Full name"
-                  placeholder="e.g. Yasmine Benali"
+                  label={t('rating.fullName')}
+                  placeholder={t('rating.fullNamePlaceholder')}
                   iconLeft={<User size={17} strokeWidth={1.9} />}
-                  error={errors.name?.message}
+                  error={tErr(t, errors.name?.message)}
                   {...register('name')}
                 />
 
                 {/* Wilaya */}
                 <label className="flex w-full flex-col gap-1.5 font-ui">
-                  <span className="text-sm font-semibold text-ink-700">Wilaya</span>
+                  <span className="text-sm font-semibold text-ink-700">{t('rating.wilaya')}</span>
                   <div className="relative flex items-center">
-                    <span className="absolute left-3.5 flex text-ink-400">
+                    <span className="absolute start-3.5 flex text-ink-400">
                       <MapPin size={17} strokeWidth={1.9} />
                     </span>
                     <select
-                      className={`w-full box-border appearance-none rounded-md border-2 bg-white py-3 pl-10 pr-4 font-ui text-base text-ink-900 outline-none transition-[border-color,box-shadow] focus:border-pink-400 focus:shadow-[0_0_0_4px_var(--color-pink-50)] ${
+                      className={`w-full box-border appearance-none rounded-md border-2 bg-white py-3 ps-10 pe-4 font-ui text-base text-ink-900 outline-none transition-[border-color,box-shadow] focus:border-pink-400 focus:shadow-[0_0_0_4px_var(--color-pink-50)] ${
                         errors.wilaya ? 'border-rose-red' : 'border-warm-200'
                       }`}
                       defaultValue=""
                       {...register('wilaya')}
                     >
                       <option value="" disabled>
-                        Select your wilaya…
+                        {t('rating.selectWilaya')}
                       </option>
                       {wilayas.map((w, i) => (
                         <option key={w} value={w}>
@@ -143,7 +149,7 @@ export function Rating() {
                     </select>
                   </div>
                   {errors.wilaya && (
-                    <span className="text-xs text-rose-red">{errors.wilaya.message}</span>
+                    <span className="text-xs text-rose-red">{tErr(t, errors.wilaya.message)}</span>
                   )}
                 </label>
 
@@ -151,18 +157,18 @@ export function Rating() {
                 <label className="flex w-full flex-col gap-1.5 font-ui">
                   <span className="flex items-center gap-1.5 text-sm font-semibold text-ink-700">
                     <MessageSquare size={15} strokeWidth={1.9} />
-                    Your review
+                    {t('rating.yourReview')}
                   </span>
                   <textarea
                     rows={4}
-                    placeholder="Tell us what you loved about your order…"
+                    placeholder={t('rating.reviewPlaceholder')}
                     className={`w-full box-border resize-none rounded-md border-2 bg-white px-4 py-3 font-ui text-base text-ink-900 outline-none transition-[border-color,box-shadow] focus:border-pink-400 focus:shadow-[0_0_0_4px_var(--color-pink-50)] ${
                       errors.comment ? 'border-rose-red' : 'border-warm-200'
                     }`}
                     {...register('comment')}
                   />
                   {errors.comment && (
-                    <span className="text-xs text-rose-red">{errors.comment.message}</span>
+                    <span className="text-xs text-rose-red">{tErr(t, errors.comment.message)}</span>
                   )}
                 </label>
 
@@ -173,7 +179,7 @@ export function Rating() {
                 )}
 
                 <Button type="submit" full size="lg" disabled={isSubmitting}>
-                  {isSubmitting ? 'Submitting…' : 'Submit rating'}
+                  {isSubmitting ? t('rating.submitting') : t('rating.submit')}
                 </Button>
               </div>
             </form>
@@ -185,6 +191,7 @@ export function Rating() {
 }
 
 function SuccessView({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col items-center gap-4 px-8 py-12 text-center">
       <motion.div
@@ -195,12 +202,12 @@ function SuccessView({ onClose }: { onClose: () => void }) {
       >
         <CheckCircle2 size={48} strokeWidth={1.8} />
       </motion.div>
-      <h1 className="font-display text-3xl font-semibold text-ink-900">Thank you! 🌸</h1>
+      <h1 className="font-display text-3xl font-semibold text-ink-900">{t('rating.thankYou')}</h1>
       <p className="max-w-[320px] text-[15px] leading-relaxed text-ink-700">
-        Your rating has been submitted. We truly appreciate you supporting Algerian craftsmanship.
+        {t('rating.thankYouBody')}
       </p>
       <Button size="lg" onClick={onClose} className="mt-2">
-        Back to store
+        {t('common.backToStore')}
       </Button>
     </div>
   );

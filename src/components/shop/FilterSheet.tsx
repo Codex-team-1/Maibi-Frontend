@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { useI18n } from '@/i18n';
 import { FilterContent, type FilterContentProps } from './FilterControls';
 
 interface FilterSheetProps extends FilterContentProps {
@@ -18,6 +19,7 @@ export function FilterSheet({
   resultCount,
   ...filters
 }: FilterSheetProps) {
+  const { t } = useI18n();
   return (
     <AnimatePresence>
       {open && (
@@ -38,18 +40,18 @@ export function FilterSheet({
             className="fixed bottom-0 inset-x-0 bg-white rounded-t-[24px] z-61 max-h-[85vh] flex flex-col"
           >
             <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-warm-200 flex-none">
-              <span className="font-bold text-[17px] text-ink-900">Filters</span>
+              <span className="font-bold text-[17px] text-ink-900">{t('shop.filters')}</span>
               <div className="flex gap-3 items-center">
                 <button
                   type="button"
                   onClick={clearAll}
                   className="border-0 bg-transparent text-pink-600 font-semibold text-sm cursor-pointer"
                 >
-                  Clear all
+                  {t('common.clearAll')}
                 </button>
                 <button
                   type="button"
-                  aria-label="Close filters"
+                  aria-label={t('filter.closeFilters')}
                   onClick={onClose}
                   className="border-0 bg-transparent cursor-pointer text-ink-500 flex"
                 >
@@ -62,7 +64,7 @@ export function FilterSheet({
             </div>
             <div className="px-5 pt-3.5 pb-8 border-t border-warm-200 flex-none">
               <Button full size="lg" onClick={onClose}>
-                Show {resultCount} result{resultCount !== 1 ? 's' : ''}
+                {t(resultCount === 1 ? 'filter.showResultsOne' : 'filter.showResultsMany', { count: resultCount })}
               </Button>
             </div>
           </motion.div>

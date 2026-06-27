@@ -12,13 +12,24 @@ import { useLayoutContext } from '@/hooks/useLayoutContext';
 import { useConfig } from '@/store/useConfig';
 import { useAsync } from '@/hooks/useAsync';
 import { listProducts } from '@/api';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 const PRICE_MAX = 20000;
 
+/** Translation key for each sort option value. */
+const SORT_KEY: Record<string, TranslationKey> = {
+  featured: 'sort.featured',
+  new: 'sort.new',
+  'price-asc': 'sort.priceAsc',
+  'price-desc': 'sort.priceDesc',
+  limited: 'sort.limited',
+};
+
 export function Shop() {
   const { isMobile, isTablet, w } = useLayoutContext();
   const { categories }            = useConfig();
+  const { t }                     = useI18n();
   const [searchParams]            = useSearchParams();
   const query                     = searchParams.get('q') ?? '';
 
@@ -75,7 +86,7 @@ export function Shop() {
   const activeTags = [
     ...Array.from(cats).map((c) => ({ label: c,          clear: () => toggleCat(c) })),
     ...Array.from(badgeLabels).map((b) => ({ label: b,   clear: () => toggleBadgeLabel(b) })),
-    ...(inStockOnly ? [{ label: 'In stock', clear: () => setInStockOnly(false) }] : []),
+    ...(inStockOnly ? [{ label: t('shop.inStock'), clear: () => setInStockOnly(false) }] : []),
     ...(priceMin > 0 || priceMax < PRICE_MAX ? [{
       label: `${priceMin.toLocaleString('fr-FR')}–${priceMax.toLocaleString('fr-FR')} DA`,
       clear: () => { setPriceMin(0); setPriceMax(PRICE_MAX); },
@@ -115,7 +126,7 @@ export function Shop() {
       className="font-ui text-sm font-medium text-ink-900 border-2 border-warm-200 rounded-full px-3.5 py-[9px] bg-white cursor-pointer outline-none flex-none"
     >
       {SORT_OPTS.map((o) => (
-        <option key={o.value} value={o.value}>{o.label}</option>
+        <option key={o.value} value={o.value}>{t(SORT_KEY[o.value] ?? 'sort.featured')}</option>
       ))}
     </select>
   );
@@ -126,7 +137,7 @@ export function Shop() {
         <button
           key={v}
           type="button"
-          aria-label={`${v} view`}
+          aria-label={v === 'grid' ? t('shop.gridView') : t('shop.listView')}
           onClick={() => setView(v)}
           className={cn(
             'border-0 cursor-pointer px-2.5 py-1.5 flex transition-all',
@@ -146,10 +157,11 @@ export function Shop() {
     <main className={cn('max-w-[1240px] w-full mx-auto', isMobile ? 'pt-6 pb-25' : 'px-8 pt-8 pb-16')}>
       <div className={cn('flex items-baseline gap-3 mb-5', isMobile && 'px-4')}>
         <h1 className={cn('font-display font-semibold text-ink-900 m-0', isMobile ? 'text-3xl' : 'text-[40px]')}>
-          Shop all
+          {t('shop.title')}
         </h1>
         <span className="text-ink-500 text-sm">
-          {total} piece{total !== 1 ? 's' : ''}{query ? ` for "${query}"` : ''}
+          {t(total === 1 ? 'shop.countOne' : 'shop.countMany', { count: total })}
+          {query ? t('shop.forQuery', { query }) : ''}
         </span>
       </div>
 
@@ -165,7 +177,7 @@ export function Shop() {
                 : 'border-warm-200 bg-white text-ink-700',
             )}
           >
-            <Filter size={20} strokeWidth={1.8} /> Filters{activeTags.length > 0 ? ` (${activeTags.length})` : ''}
+            <Filter size={20} strokeWidth={1.8} /> {t('shop.filters')}{activeTags.length > 0 ? ` (${activeTags.length})` : ''}
           </button>
           {sortSelect}
           {viewToggle('rounded-full')}
@@ -182,7 +194,7 @@ export function Shop() {
               {tag.label}
               <button
                 type="button"
-                aria-label={`Remove ${tag.label} filter`}
+                aria-label={t('shop.removeFilter', { label: tag.label })}
                 onClick={tag.clear}
                 className="border-0 bg-transparent cursor-pointer flex p-0 text-pink-400"
               >
@@ -195,7 +207,7 @@ export function Shop() {
             onClick={clearAll}
             className="border-0 bg-transparent text-pink-600 font-semibold text-xs cursor-pointer flex-none"
           >
-            Clear all
+            {t('common.clearAll')}
           </button>
         </div>
       )}
@@ -208,7 +220,7 @@ export function Shop() {
           >
             <div className="flex justify-between items-center mb-[18px]">
               <span className="font-bold text-[15px] text-ink-900 flex items-center gap-1.5">
-                <Filter size={20} strokeWidth={1.8} /> Filters
+                <Filter size={20} strokeWidth={1.8} /> {t('shop.filters')}
                 {activeTags.length > 0 && (
                   <span className="bg-pink-400 text-white text-[11px] font-bold rounded-full w-[18px] h-[18px] grid place-items-center">
                     {activeTags.length}
@@ -221,7 +233,7 @@ export function Shop() {
                   onClick={clearAll}
                   className="border-0 bg-transparent text-pink-600 text-xs font-semibold cursor-pointer p-0"
                 >
-                  Clear all
+                  {t('common.clearAll')}
                 </button>
               )}
             </div>
@@ -241,7 +253,7 @@ export function Shop() {
                     {tag.label}
                     <button
                       type="button"
-                      aria-label={`Remove ${tag.label} filter`}
+                      aria-label={t('shop.removeFilter', { label: tag.label })}
                       onClick={tag.clear}
                       className="border-0 bg-transparent cursor-pointer flex p-0 text-pink-400"
                     >
@@ -251,14 +263,14 @@ export function Shop() {
                 ))}
               </div>
               <div className="flex items-center gap-2.5 ml-auto">
-                <span className="text-[13px] text-ink-500">Sort by</span>
+                <span className="text-[13px] text-ink-500">{t('shop.sortBy')}</span>
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as SortValue)}
                   className="font-ui text-sm font-medium text-ink-900 border-2 border-warm-200 rounded-md px-3 py-2 bg-white cursor-pointer outline-none"
                 >
                   {SORT_OPTS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>{t(SORT_KEY[o.value] ?? 'sort.featured')}</option>
                   ))}
                 </select>
                 {viewToggle('rounded-md')}
@@ -269,17 +281,17 @@ export function Shop() {
           {error && items.length === 0 ? (
             <ErrorState message={error} onRetry={reload} />
           ) : initialLoading ? (
-            <Spinner label="Loading pieces…" />
+            <Spinner label={t('shop.loadingPieces')} />
           ) : items.length === 0 ? (
             <div className="text-center py-20 px-6 text-ink-500">
               <div className="font-script text-[44px] text-pink-200 mb-2.5">Maibi</div>
               <div className="font-display text-xl font-semibold text-ink-700 mb-2">
-                No pieces match your filters
+                {t('shop.noMatchTitle')}
               </div>
               <p className="max-w-[300px] mx-auto mb-4.5 text-sm">
-                Try broadening your search or clearing some filters.
+                {t('shop.noMatchBody')}
               </p>
-              <Button variant="stitch" onClick={clearAll}>Clear all filters</Button>
+              <Button variant="stitch" onClick={clearAll}>{t('shop.clearAllFilters')}</Button>
             </div>
           ) : (
             <>
@@ -301,7 +313,7 @@ export function Shop() {
               {hasMore && (
                 <div className="flex justify-center mt-8">
                   <Button variant="secondary" size="lg" onClick={() => setPage((p) => p + 1)} disabled={loading}>
-                    {loading ? 'Loading…' : 'Load more'}
+                    {loading ? t('common.loading') : t('shop.loadMore')}
                   </Button>
                 </div>
               )}

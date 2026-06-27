@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react';
 import type { Product } from '@/types';
 import { Badge, Button, Stars } from '@/components/ui';
 import { useWishlist } from '@/store/useWishlist';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
@@ -14,6 +15,7 @@ const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
 
 export function ProductListCard({ product }: { product: Product }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [hover, setHover] = useState(false);
   const liked  = useWishlist((s) => s.ids.includes(product.id));
   const toggle = useWishlist((s) => s.toggle);
@@ -39,8 +41,8 @@ export function ProductListCard({ product }: { product: Product }) {
           </div>
         )}
         {product.badgeLabel && (
-          <div className="absolute top-2 left-2">
-            <Badge variant={BADGE_VARIANT[product.badgeLabel] ?? 'gold'}>{product.badgeLabel}</Badge>
+          <div className="absolute top-2 start-2">
+            <Badge variant={BADGE_VARIANT[product.badgeLabel] ?? 'gold'}>{t(`badge.${product.badgeLabel}` as TranslationKey)}</Badge>
           </div>
         )}
       </div>
@@ -52,7 +54,7 @@ export function ProductListCard({ product }: { product: Product }) {
         <div className="flex items-center gap-2 mt-0.5">
           <span className="font-bold text-pink-600 text-[17px]">{product.price}</span>
           {!product.inStock && (
-            <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Sold out</span>
+            <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">{t('common.soldOut')}</span>
           )}
         </div>
         {(product.sizes?.length ?? 0) > 0 && (
@@ -65,7 +67,7 @@ export function ProductListCard({ product }: { product: Product }) {
       </div>
 
       <div className="flex flex-col gap-2 justify-center">
-        <Button size="sm" onClick={(e) => { e.stopPropagation(); open(); }}>View</Button>
+        <Button size="sm" onClick={(e) => { e.stopPropagation(); open(); }}>{t('product.view')}</Button>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); toggle(product.id); }}
@@ -75,7 +77,7 @@ export function ProductListCard({ product }: { product: Product }) {
             liked ? 'text-pink-500' : 'text-ink-400',
           )}
         >
-          <Heart size={14} fill={liked ? 'var(--color-pink-500)' : 'none'} /> Save
+          <Heart size={14} fill={liked ? 'var(--color-pink-500)' : 'none'} /> {t('common.save')}
         </button>
       </div>
     </div>

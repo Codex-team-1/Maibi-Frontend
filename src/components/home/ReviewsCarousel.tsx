@@ -4,11 +4,13 @@ import { REVIEWS } from '@/data/products';
 import { listReviews } from '@/api';
 import type { Review } from '@/types';
 import { Stars } from '@/components/ui';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 const GAP = 20;
 
 export function ReviewsCarousel({ isMobile }: { isMobile: boolean }) {
+  const { t } = useI18n();
   const visible = isMobile ? 1 : 3;
   const [active, setActive] = useState(0);
   const [reviews, setReviews] = useState<Review[]>(REVIEWS);
@@ -104,12 +106,12 @@ export function ReviewsCarousel({ isMobile }: { isMobile: boolean }) {
               isMobile ? 'text-[26px]' : 'text-4xl',
             )}
           >
-            Customer reviews
+            {t('reviews.title')}
           </h2>
           <div className="flex items-center gap-2">
             <span className="text-gold text-sm tracking-wide">★★★★★</span>
             <span className="text-ink-500 text-[13px]">
-              4.9 · 200+ verified customers
+              {t('reviews.summary')}
             </span>
           </div>
         </div>
@@ -125,6 +127,7 @@ export function ReviewsCarousel({ isMobile }: { isMobile: boolean }) {
 
       <div
         ref={containerRef}
+        dir="ltr"
         className={cn('overflow-hidden', dragging ? 'cursor-grabbing' : 'cursor-grab')}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
@@ -141,6 +144,7 @@ export function ReviewsCarousel({ isMobile }: { isMobile: boolean }) {
           {reviews.map((r, i) => (
             <div
               key={i}
+              dir="auto"
               className="flex-none bg-white rounded-lg border border-warm-200 flex flex-col gap-3.5"
               style={{
                 width: cardW || (isMobile ? '100%' : 'calc(33.333% - 14px)'),
@@ -172,7 +176,7 @@ export function ReviewsCarousel({ isMobile }: { isMobile: boolean }) {
                 </div>
                 <div className="flex items-center gap-1 bg-sage/15 border border-sage/40 rounded-full px-2.5 py-1 text-[11px] font-semibold text-sage flex-none">
                   <BadgeCheck size={11} strokeWidth={2.5} />
-                  Verified
+                  {t('reviews.verified')}
                 </div>
               </div>
             </div>
