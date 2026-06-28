@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, TrendingDown, ShoppingBag, Sparkles, Package,
   DollarSign, ArrowUpRight, CheckCircle2, Clock, AlertTriangle,
-  Star, BarChart3, RotateCcw,
+  Star, BarChart3, RotateCcw, X, ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { fmt } from '@/lib/format';
@@ -15,6 +15,7 @@ import type {
   CategorySplitDTO,
   TopProductDTO,
   ActivityDTO,
+  LowStockProductDTO,
 } from '@/api';
 import { Spinner, ErrorState } from '@/components/ui';
 
@@ -316,6 +317,114 @@ function ActivityFeed({ data }: { data: ActivityDTO[] }) {
   );
 }
 
+/* ── Low-stock alert banner ───────────────────────────────────────────────── */
+function LowStockAlert({ items }: { items: LowStockProductDTO[] }) {
+  const [dismissed, setDismissed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  if (dismissed || items.length === 0) return null;
+
+  const outOfStock = items.filter((p) => p.stock === 0);
+  const critical   = items.filter((p) => p.stock > 0 && p.stock <= 1);
+  const low        = items.filter((p) => p.stock > 1);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+        className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden"
+      >
+        {/* Header row */}
+        <div className="flex items-center gap-3 px-5 py-4">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+            <AlertTriangle size={17} className="text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-amber-900">
+              {items.length} product{items.length > 1 ? 's' : ''} running low on stock
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              {outOfStock.length > 0 && <span className="font-semibold">{outOfStock.length} out of stock · </span>}
+              {critical.length > 0 && <span className="font-semibold">{critical.length} critical (≤1) · </span>}
+              {low.length > 0 && <span>{low.length} low (≤3)</span>}
+            </p>
+          </div>
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-900 transition-colors px-2 py-1 rounded-lg hover:bg-amber-100"
+          >
+            {expanded ? 'Collapse' : 'View all'}
+            <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.15 }}>
+              <ChevronRight size={13} />
+            </motion.span>
+          </button>
+          <button
+            onClick={() => setDismissed(true)}
+            className="p-1 rounded-lg text-amber-500 hover:bg-amber-100 transition-colors"
+            title="Dismiss"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Expanded product list */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-amber-200 px-5 py-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {items.map((p) => {
+                  const isOut = p.stock === 0;
+                  const isCritical = p.stock > 0 && p.stock <= 1;
+                  return (
+                    <div
+                      key={p.id}
+                      className={cn(
+                        'flex items-center gap-3 p-3 rounded-xl border',
+                        isOut      ? 'bg-red-50 border-red-200'    :
+                        isCritical ? 'bg-orange-50 border-orange-200' :
+                                     'bg-amber-50/60 border-amber-200',
+                      )}
+                    >
+                      {p.image ? (
+                        <img src={p.image} alt={p.name} className="w-9 h-9 rounded-lg object-cover shrink-0 border border-warm-200" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-lg bg-warm-100 flex items-center justify-center shrink-0">
+                          <Package size={14} className="text-ink-300" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-ink-800 truncate">{p.name}</p>
+                        <p className="text-xs text-ink-400">{p.category}</p>
+                      </div>
+                      <span className={cn(
+                        'text-xs font-bold px-2 py-1 rounded-full shrink-0',
+                        isOut      ? 'bg-red-100 text-red-700'       :
+                        isCritical ? 'bg-orange-100 text-orange-700' :
+                                     'bg-amber-100 text-amber-700',
+                      )}>
+                        {isOut ? 'Out' : `${p.stock} left`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 /* ── Refresh button ───────────────────────────────────────────────────────── */
 function RefreshButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
   return (
@@ -361,10 +470,13 @@ export function Analytics() {
         <RefreshButton onClick={reload} loading={loading} />
       </div>
 
+      {/* Low-stock alert — shown above KPIs when there are issues */}
+      {s.lowStockList.length > 0 && <LowStockAlert items={s.lowStockList} />}
+
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Total Revenue"
+          label="Delivered Revenue"
           value={fmt(s.totalRevenue)}
           delta={s.revenueGrowth}
           icon={<DollarSign size={18} className="text-pink-500" />}
@@ -398,11 +510,18 @@ export function Analytics() {
       </div>
 
       {/* Secondary stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Pending Orders', value: s.pendingOrders, color: 'text-amber-600', bg: 'bg-amber-50', icon: <Clock size={14} /> },
-          { label: 'Active Products', value: s.activeProducts, color: 'text-emerald-700', bg: 'bg-emerald-50', icon: <Package size={14} /> },
-          { label: 'Conversion Rate', value: `${s.conversionRate}%`, color: 'text-pink-500', bg: 'bg-pink-50', icon: <ArrowUpRight size={14} /> },
+          { label: 'Pending Orders',  value: s.pendingOrders,     color: 'text-amber-600',   bg: 'bg-amber-50',   icon: <Clock size={14} /> },
+          { label: 'Active Products', value: s.activeProducts,    color: 'text-emerald-700', bg: 'bg-emerald-50', icon: <Package size={14} /> },
+          { label: 'Avg Order Value', value: fmt(s.avgOrderValue), color: 'text-pink-500',   bg: 'bg-pink-50',    icon: <ArrowUpRight size={14} /> },
+          {
+            label: 'Low Stock',
+            value: s.lowStockProducts,
+            color: s.lowStockProducts > 0 ? 'text-red-600' : 'text-ink-400',
+            bg:    s.lowStockProducts > 0 ? 'bg-red-50'    : 'bg-warm-100',
+            icon: <AlertTriangle size={14} />,
+          },
         ].map((item) => (
           <div key={item.label} className="bg-white rounded-2xl border border-warm-200 p-4 flex items-center gap-3 shadow-sm">
             <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center shrink-0', item.bg, item.color)}>

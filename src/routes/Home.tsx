@@ -434,23 +434,23 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── Featured Pieces ── */}
+      {/* ── New Arrivals ── */}
       <section
         className={cn(
           "max-w-[1240px] mx-auto",
           px,
-          isMobile ? "pt-10" : "pt-18",
+          isMobile ? "pt-12" : "pt-22",
         )}
       >
         <SectionTitle
-          sub={t("home.featuredSub")}
-          action={t("home.viewAll")}
+          sub={t("home.newArrivalsSub")}
+          action={t("home.shopAll")}
           onAction={() => navigate("/shop")}
           isMobile={isMobile}
         >
-          {t("home.featuredPieces")}
+          {t("home.newArrivals")}
         </SectionTitle>
-        {featured.loading ? (
+        {newArrivals.loading ? (
           <Spinner />
         ) : (
           <div
@@ -459,7 +459,7 @@ export function Home() {
               isMobile ? "grid-cols-2 gap-3.5" : "grid-cols-4 gap-6",
             )}
           >
-            {(featured.data?.items ?? []).slice(0, 4).map((p) => (
+            {(newArrivals.data?.items ?? []).map((p) => (
               <ProductCard key={p.id} product={p} isMobile={isMobile} />
             ))}
           </div>
@@ -476,7 +476,10 @@ export function Home() {
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-pink-200 to-pink-300/60" />
         <div className="mx-5 flex items-center gap-3 rounded-full border border-pink-200 bg-white px-5 py-2.5 shadow-sm">
           <Gem
-            className={cn("text-pink-400 flex-none", isMobile ? "size-3.5" : "size-4")}
+            className={cn(
+              "text-pink-400 flex-none",
+              isMobile ? "size-3.5" : "size-4",
+            )}
             strokeWidth={1.8}
           />
           <span
@@ -488,7 +491,10 @@ export function Home() {
             {t("home.ourStory")}
           </span>
           <span
-            className={cn("text-pink-300 select-none", isMobile ? "text-[10px]" : "text-xs")}
+            className={cn(
+              "text-pink-300 select-none",
+              isMobile ? "text-[10px]" : "text-xs",
+            )}
           >
             ✦
           </span>
@@ -560,9 +566,21 @@ export function Home() {
               {/* Stats row */}
               <div className="flex gap-5 mb-6 pb-5 border-b border-white/10">
                 {[
-                  ["5+", t("home.statArtisans"), <Users key="u" className="size-3.5" />],
-                  ["100+", t("home.statPieces"), <Gem key="g" className="size-3.5" />],
-                  ["3", t("home.statCities"), <MapPin key="m" className="size-3.5" />],
+                  [
+                    "5+",
+                    t("home.statArtisans"),
+                    <Users key="u" className="size-3.5" />,
+                  ],
+                  [
+                    "100+",
+                    t("home.statPieces"),
+                    <Gem key="g" className="size-3.5" />,
+                  ],
+                  [
+                    "3",
+                    t("home.statCities"),
+                    <MapPin key="m" className="size-3.5" />,
+                  ],
                 ].map(([n, l, icon]) => (
                   <div key={String(l)} className="flex-1">
                     <div className="font-display font-bold text-pink-400 text-[22px] leading-none mb-0.5">
@@ -703,13 +721,21 @@ export function Home() {
                 {/* Stats */}
                 <div className="flex gap-8 py-5 border-t border-white/10">
                   {[
-                    ["5+", t("home.statArtisans"), <Users key="u" className="size-3.5" />],
+                    [
+                      "5+",
+                      t("home.statArtisans"),
+                      <Users key="u" className="size-3.5" />,
+                    ],
                     [
                       "100+",
                       t("home.statPiecesMade"),
                       <Gem key="g" className="size-3.5" />,
                     ],
-                    ["3", t("home.statCities"), <MapPin key="m" className="size-3.5" />],
+                    [
+                      "3",
+                      t("home.statCities"),
+                      <MapPin key="m" className="size-3.5" />,
+                    ],
                   ].map(([n, l, icon]) => (
                     <div key={String(l)}>
                       <div className="font-display font-bold text-pink-400 text-[28px] leading-none mb-1">
@@ -747,23 +773,23 @@ export function Home() {
         )}
       </section>
 
-      {/* ── New Arrivals ── */}
+      {/* ── Featured Pieces ── */}
       <section
         className={cn(
           "max-w-[1240px] mx-auto",
           px,
-          isMobile ? "pt-12" : "pt-22",
+          isMobile ? "pt-10" : "pt-18",
         )}
       >
         <SectionTitle
-          sub={t("home.newArrivalsSub")}
-          action={t("home.shopAll")}
+          sub={t("home.featuredSub")}
+          action={t("home.viewAll")}
           onAction={() => navigate("/shop")}
           isMobile={isMobile}
         >
-          {t("home.newArrivals")}
+          {t("home.featuredPieces")}
         </SectionTitle>
-        {newArrivals.loading ? (
+        {featured.loading ? (
           <Spinner />
         ) : (
           <div
@@ -772,7 +798,7 @@ export function Home() {
               isMobile ? "grid-cols-2 gap-3.5" : "grid-cols-4 gap-6",
             )}
           >
-            {(newArrivals.data?.items ?? []).map((p) => (
+            {(featured.data?.items ?? []).slice(0, 4).map((p) => (
               <ProductCard key={p.id} product={p} isMobile={isMobile} />
             ))}
           </div>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Heart, Sparkles, Scissors, Globe, ShoppingBag } from 'lucide-react';
 import { useWishlist, selectWishCount } from '@/store/useWishlist';
 import { useCart, selectCartCount } from '@/store/useCart';
@@ -50,6 +50,7 @@ function NavItem({
   dot?: string;
   icon?: React.ReactNode;
 }) {
+  const location = useLocation();
   const isHash = to.includes('#');
 
   if (isHash) {
@@ -75,33 +76,32 @@ function NavItem({
     );
   }
 
+  const [toPath, toSearch] = to.split('?');
+  const currentFull = location.pathname + location.search;
+  const isActive = toSearch
+    ? currentFull === `${toPath}?${toSearch}`
+    : location.pathname === toPath && !location.search;
+
   return (
     <NavLink
       to={to}
-      end={to === '/shop'}
-      className={({ isActive }) =>
-        cn(
-          'relative flex items-center gap-1.5 font-ui text-[14.5px] font-medium py-1 no-underline transition-colors duration-200',
-          isActive
-            ? 'text-pink-500 [&>span:last-child]:w-full'
-            : 'text-ink-600 hover:text-pink-500 [&:hover>span:last-child]:w-full',
-        )
-      }
-    >
-      {({ isActive }) => (
-        <>
-          {dot && (
-            <span className={cn('size-1.5 rounded-full shrink-0', dot)} />
-          )}
-          {icon && !dot && (
-            <span className={cn(isActive ? 'text-pink-500' : 'text-pink-400')}>
-              {icon}
-            </span>
-          )}
-          <span>{label}</span>
-          <span className="absolute bottom-0 start-0 h-[2px] w-0 rounded-full bg-pink-400 transition-all duration-300" />
-        </>
+      className={cn(
+        'relative flex items-center gap-1.5 font-ui text-[14.5px] font-medium py-1 no-underline transition-colors duration-200',
+        isActive
+          ? 'text-pink-500 [&>span:last-child]:w-full'
+          : 'text-ink-600 hover:text-pink-500 [&:hover>span:last-child]:w-full',
       )}
+    >
+      {dot && (
+        <span className={cn('size-1.5 rounded-full shrink-0', dot)} />
+      )}
+      {icon && !dot && (
+        <span className={cn(isActive ? 'text-pink-500' : 'text-pink-400')}>
+          {icon}
+        </span>
+      )}
+      <span>{label}</span>
+      <span className="absolute bottom-0 start-0 h-[2px] w-0 rounded-full bg-pink-400 transition-all duration-300" />
     </NavLink>
   );
 }
@@ -132,6 +132,10 @@ export function Header({ isMobile }: { isMobile: boolean }) {
   const wishCount = useWishlist(selectWishCount);
   const cartCount = useCart(selectCartCount);
   const openCart = useUI((s) => s.openCart);
+
+  useEffect(() => {
+    setSearchOpen(false);
+  }, [location.pathname]);
 
   const onSearch = (value: string) => {
     setQuery(value);

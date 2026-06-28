@@ -1,24 +1,220 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, ShoppingBag, Sparkles, Package, Menu, X,
   ChevronLeft, LogOut, Settings,
   AlertCircle, User, Shield, ChevronDown,
-  Check, Loader2,
+  Check, Loader2, Bell, Star,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { fmt } from '@/lib/format';
 import { useAuth } from '@/store/useAuth';
 import { useAsync } from '@/hooks/useAsync';
-import { adminGetAnalytics, adminUpdateProfile } from '@/api';
+import { adminGetAnalytics, adminUpdateProfile, adminGetNewOrders, adminGetLowStock } from '@/api';
+import type { NewOrderNotification, LowStockProductDTO as LowStockNotification } from '@/api';
 import { ApiError } from '@/lib/api';
 import maibiLogo from '@/assets/maibi-logo.jpg';
+
+const LAST_SEEN_KEY = 'maibi_admin_last_seen_order';
+const POLL_INTERVAL_MS = 30_000;
 
 interface NavItem {
   to: string;
   icon: React.ReactNode;
   label: string;
   badge?: number;
+}
+
+/* ── Order + stock notification bell ─────────────────────────────────────── */
+function NotificationBell() {
+  const [newOrders, setNewOrders]     = useState<NewOrderNotification[]>([]);
+  const [lowStock,  setLowStock]      = useState<LowStockNotification[]>([]);
+  const [open,      setOpen]          = useState(false);
+  const [tab,       setTab]           = useState<'orders' | 'stock'>('orders');
+  const panelRef                      = useRef<HTMLDivElement>(null);
+
+  const fetchNew = useCallback(async () => {
+    const since = localStorage.getItem(LAST_SEEN_KEY) ?? new Date(0).toISOString();
+    try {
+      const [ordersRes, stockRes] = await Promise.all([
+        adminGetNewOrders(since),
+        adminGetLowStock(),
+      ]);
+      if (ordersRes.count > 0) setNewOrders(ordersRes.orders);
+      setLowStock(stockRes);
+    } catch {
+      // silent — don't disrupt the admin on poll failure
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNew();
+    const id = setInterval(fetchNew, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [fetchNew]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const markOrdersSeen = () => {
+    localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
+    setNewOrders([]);
+  };
+
+  const orderCount = newOrders.length;
+  const stockCount = lowStock.length;
+  const totalCount = orderCount + stockCount;
+
+  return (
+    <div className="relative" ref={panelRef}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          'relative p-2 rounded-xl transition-colors',
+          totalCount > 0
+            ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+            : 'text-ink-400 hover:bg-warm-100',
+        )}
+        title="Notifications"
+      >
+        <Bell size={18} />
+        {totalCount > 0 && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
+          >
+            {totalCount}
+          </motion.span>
+        )}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-warm-200 z-50 overflow-hidden"
+          >
+            {/* Panel header */}
+            <div className="px-4 pt-3 pb-0 border-b border-warm-100 bg-warm-50">
+              <p className="text-sm font-bold text-ink-900 mb-2.5">Notifications</p>
+              {/* Tabs */}
+              <div className="flex gap-1">
+                {([
+                  { key: 'orders', label: 'New Orders', count: orderCount, dot: 'bg-pink-400'  },
+                  { key: 'stock',  label: 'Low Stock',  count: stockCount,  dot: 'bg-amber-400' },
+                ] as const).map(({ key, label, count: c, dot }) => (
+                  <button
+                    key={key}
+                    onClick={() => setTab(key)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg text-xs font-semibold border-b-2 transition-colors -mb-px',
+                      tab === key
+                        ? 'border-pink-400 text-pink-600 bg-white'
+                        : 'border-transparent text-ink-400 hover:text-ink-700',
+                    )}
+                  >
+                    {label}
+                    {c > 0 && (
+                      <span className={cn('w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center', dot)}>
+                        {c}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Orders tab */}
+            {tab === 'orders' && (
+              <>
+                {orderCount === 0 ? (
+                  <div className="py-10 text-center">
+                    <ShoppingBag size={28} className="text-warm-200 mx-auto mb-2" />
+                    <p className="text-sm text-ink-400">No new orders</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="max-h-72 overflow-y-auto divide-y divide-warm-100">
+                      {newOrders.map((o) => (
+                        <div key={o.id} className="px-4 py-3 hover:bg-warm-50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-xs font-bold text-pink-500">{o.id}</span>
+                            <span className="text-xs font-bold text-ink-900">{fmt(o.total)}</span>
+                          </div>
+                          <p className="text-sm font-semibold text-ink-700 mt-0.5">{o.customer}</p>
+                          <p className="text-xs text-ink-400">{o.wilaya} · {new Date(o.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="px-4 py-3 border-t border-warm-100 bg-warm-50">
+                      <button
+                        onClick={markOrdersSeen}
+                        className="w-full py-2 bg-pink-400 text-white text-sm font-bold rounded-xl hover:brightness-105 transition"
+                      >
+                        Dismiss all
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Stock tab */}
+            {tab === 'stock' && (
+              <>
+                {stockCount === 0 ? (
+                  <div className="py-10 text-center">
+                    <Package size={28} className="text-warm-200 mx-auto mb-2" />
+                    <p className="text-sm text-ink-400">All products are well stocked</p>
+                  </div>
+                ) : (
+                  <div className="max-h-72 overflow-y-auto divide-y divide-warm-100">
+                    {lowStock.map((p) => {
+                      const isOut = p.stock === 0;
+                      return (
+                        <div key={p.id} className="flex items-center gap-3 px-4 py-3 hover:bg-warm-50 transition-colors">
+                          {p.image ? (
+                            <img src={p.image} alt={p.name} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-warm-200" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-warm-100 flex items-center justify-center shrink-0">
+                              <Package size={13} className="text-ink-300" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-ink-700 truncate">{p.name}</p>
+                            <p className="text-xs text-ink-400">{p.category}</p>
+                          </div>
+                          <span className={cn(
+                            'text-xs font-bold px-2 py-1 rounded-full shrink-0',
+                            isOut ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700',
+                          )}>
+                            {isOut ? 'Out' : `${p.stock} left`}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
 /* ── Sign-out confirmation modal ─────────────────────────────────────────── */
@@ -322,6 +518,7 @@ export function AdminLayout() {
     { to: '/admin/orders', icon: <ShoppingBag size={18} />, label: 'Orders', badge: pendingOrders },
     { to: '/admin/custom-orders', icon: <Sparkles size={18} />, label: 'Custom Orders' },
     { to: '/admin/products', icon: <Package size={18} />, label: 'Products', badge: lowStockProducts },
+    { to: '/admin/reviews', icon: <Star size={18} />, label: 'Reviews' },
   ];
 
   const currentLabel = NAV.find((n) =>
@@ -478,6 +675,9 @@ export function AdminLayout() {
                 {pendingOrders} pending
               </div>
             )}
+
+            {/* Notification bell */}
+            <NotificationBell />
 
             {/* Avatar + name */}
             <button

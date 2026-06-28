@@ -14,6 +14,7 @@ import { Analytics } from '@/admin/pages/Analytics';
 import { Orders } from '@/admin/pages/Orders';
 import { CustomOrders } from '@/admin/pages/CustomOrders';
 import { Products } from '@/admin/pages/Products';
+import { Reviews } from '@/admin/pages/Reviews';
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
       { path: 'orders', element: <Orders /> },
       { path: 'custom-orders', element: <CustomOrders /> },
       { path: 'products', element: <Products /> },
+      { path: 'reviews', element: <Reviews /> },
     ],
   },
 ]);

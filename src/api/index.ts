@@ -14,7 +14,10 @@ import type {
   CustomOrderDTO,
   UpdateCustomOrderBody,
   ReviewDTO,
+  AdminReviewDTO,
   CreateReviewBody,
+  NewOrdersSinceResponse,
+  LowStockProductDTO,
   LoginResponse,
   AdminProfile,
   UpdateProfileBody,
@@ -151,9 +154,33 @@ export const adminCancelCustomOrder = (id: string) =>
 export const adminRefundCustomOrder = (id: string) =>
   apiRequest<CustomOrderDTO>(`/admin/custom-orders/${id}/refund`, { method: 'POST', auth: true });
 
+/* ── Admin: reviews ────────────────────────────────────────────────────────── */
+export interface AdminReviewQuery {
+  page?: number;
+  limit?: number;
+  approved?: 'true' | 'false';
+  q?: string;
+}
+
+export const adminListReviews = (query: AdminReviewQuery = {}, signal?: AbortSignal) =>
+  apiRequest<Paginated<AdminReviewDTO>>('/admin/reviews', { auth: true, query, signal });
+
+export const adminDeleteReview = (id: string) =>
+  apiRequest<{ ok: boolean; id: string }>(`/admin/reviews/${id}`, { method: 'DELETE', auth: true });
+
+export const adminToggleApproveReview = (id: string) =>
+  apiRequest<AdminReviewDTO>(`/admin/reviews/${id}/approve`, { method: 'PATCH', auth: true });
+
+/* ── Admin: order notifications ────────────────────────────────────────────── */
+export const adminGetNewOrders = (since: string, signal?: AbortSignal) =>
+  apiRequest<NewOrdersSinceResponse>('/admin/orders/new-since', { auth: true, query: { since }, signal });
+
 /* ── Admin: analytics ──────────────────────────────────────────────────────── */
 export const adminGetAnalytics = (signal?: AbortSignal) =>
   apiRequest<AnalyticsOverview>('/admin/analytics', { auth: true, signal });
+
+export const adminGetLowStock = (signal?: AbortSignal) =>
+  apiRequest<LowStockProductDTO[]>('/admin/analytics/low-stock', { auth: true, signal });
 
 /* ── Admin: profile ────────────────────────────────────────────────────────── */
 export const adminUpdateProfile = (body: UpdateProfileBody) =>

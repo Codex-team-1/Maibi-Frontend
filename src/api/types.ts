@@ -157,12 +157,37 @@ export interface ReviewDTO {
   createdAt: string;
 }
 
+export interface AdminReviewDTO {
+  id: string;
+  name: string;
+  wilaya: string;
+  comment: string;
+  rating: number;
+  orderCode: string | null;
+  approved: boolean;
+  createdAt: string;
+}
+
 export interface CreateReviewBody {
   name: string;
   wilaya: string;
   rating: number;
   comment: string;
   orderCode?: string;
+}
+
+/* ── Notifications ─────────────────────────────────────────────────────────── */
+export interface NewOrderNotification {
+  id: string;
+  customer: string;
+  wilaya: string;
+  total: number;
+  createdAt: string;
+}
+
+export interface NewOrdersSinceResponse {
+  count: number;
+  orders: NewOrderNotification[];
 }
 
 /* ── Custom orders ─────────────────────────────────────────────────────────── */
@@ -218,6 +243,14 @@ export interface UpdateProfileBody {
 }
 
 /* ── Analytics ─────────────────────────────────────────────────────────────── */
+export interface LowStockProductDTO {
+  id: number;
+  name: string;
+  stock: number;
+  category: string;
+  image?: string;
+}
+
 export interface AnalyticsSummary {
   totalRevenue: number;
   revenueGrowth: number;
@@ -230,6 +263,7 @@ export interface AnalyticsSummary {
   pendingOrders: number;
   activeProducts: number;
   lowStockProducts: number;
+  lowStockList: LowStockProductDTO[];
   conversionRate: number;
 }
 

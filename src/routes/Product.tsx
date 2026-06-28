@@ -163,12 +163,42 @@ export function Product() {
           <div
             className={cn(
               'relative overflow-hidden bg-warm-100',
-              isMobile ? 'aspect-[4/3] rounded-none' : 'aspect-[3/4] rounded-lg',
+              isMobile ? 'aspect-square rounded-none' : 'aspect-[3/4] rounded-lg',
               !isMobile && photos.length <= 1 && 'col-span-2',
             )}
+            {...(isMobile && photos.length > 1 ? {
+              onTouchStart: (e: React.TouchEvent) => {
+                const touch = e.touches[0];
+                (e.currentTarget as HTMLDivElement).dataset.touchStartX = String(touch.clientX);
+              },
+              onTouchEnd: (e: React.TouchEvent) => {
+                const startX = Number((e.currentTarget as HTMLDivElement).dataset.touchStartX ?? 0);
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                if (Math.abs(diff) < 40) return;
+                if (diff > 0) {
+                  setActivePhoto((p) => (p + 1) % photos.length);
+                } else {
+                  setActivePhoto((p) => (p - 1 + photos.length) % photos.length);
+                }
+              },
+            } : {})}
           >
-            {mainPhoto ? (
-              <img src={mainPhoto} alt={product.name} className="w-full h-full object-cover" />
+            {photos.length > 0 ? (
+              isMobile ? (
+                <div
+                  className="flex h-full transition-transform duration-300 ease-out"
+                  style={{ width: `${photos.length * 100}%`, transform: `translateX(${(safeIdx / photos.length) * -100}%)` }}
+                >
+                  {photos.map((url, i) => (
+                    <div key={i} className="h-full flex-none" style={{ width: `${100 / photos.length}%` }}>
+                      <img src={url} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <img src={mainPhoto} alt={product.name} className="w-full h-full object-cover" />
+              )
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="font-script text-8xl text-warm-300">Maibi</span>
@@ -177,15 +207,15 @@ export function Product() {
 
             {/* Mobile thumbnail strip */}
             {isMobile && photos.length > 1 && (
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
                 {photos.map((_, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setActivePhoto(i)}
                     className={cn(
-                      'w-1.5 h-1.5 rounded-full transition-all',
-                      i === safeIdx ? 'bg-white w-4' : 'bg-white/60',
+                      'h-1.5 rounded-full transition-all duration-200',
+                      i === safeIdx ? 'bg-white w-4' : 'bg-white/60 w-1.5',
                     )}
                   />
                 ))}

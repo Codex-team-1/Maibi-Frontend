@@ -174,10 +174,10 @@ export function ReviewsCarousel({ isMobile }: { isMobile: boolean }) {
                     {r.wilaya}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 bg-sage/15 border border-sage/40 rounded-full px-2.5 py-1 text-[11px] font-semibold text-sage flex-none">
+                {/* <div className="flex items-center gap-1 bg-sage/15 border border-sage/40 rounded-full px-2.5 py-1 text-[11px] font-semibold text-sage flex-none">
                   <BadgeCheck size={11} strokeWidth={2.5} />
-                  {t('reviews.verified')}
-                </div>
+                  Verified
+                </div> */}
               </div>
             </div>
           ))}

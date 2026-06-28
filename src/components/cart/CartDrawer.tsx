@@ -120,7 +120,10 @@ export function CartDrawer({ isMobile }: { isMobile: boolean }) {
             </div>
 
             {items.length > 0 && (
-              <div className="px-5 pt-4 pb-6 border-t border-warm-200">
+              <div
+                className="px-5 pt-4 border-t border-warm-200"
+                style={{ paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom, 0px) + 72px)' : '24px' }}
+              >
                 <div className="flex justify-between mb-1">
                   <span className="text-ink-500">{t('cart.subtotal')}</span>
                   <span className="font-bold text-xl text-ink-900">
