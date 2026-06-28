@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, BadgeCheck, Quote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, Quote } from 'lucide-react';
 import { REVIEWS } from '@/data/products';
 import { listReviews } from '@/api';
 import type { Review } from '@/types';
