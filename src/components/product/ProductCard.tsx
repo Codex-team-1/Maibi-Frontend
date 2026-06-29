@@ -11,6 +11,7 @@ interface ProductCardProps {
   product: Product;
   isMobile?: boolean;
   isTablet?: boolean;
+  forceBadge?: 'Featured' | 'Trending' | 'New';
 }
 
 const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
@@ -19,7 +20,7 @@ const BADGE_VARIANT: Record<string, 'brand' | 'gold' | 'soft'> = {
   New:      'gold',
 };
 
-export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
+export function ProductCard({ product, isMobile, isTablet, forceBadge }: ProductCardProps) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [hover, setHover] = useState(false);
@@ -66,10 +67,10 @@ export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
               <Tag size={10} /> -{discount.percent}%
             </Badge>
           </div>
-        ) : product.badgeLabel ? (
+        ) : forceBadge ? (
           <div className="absolute top-2.5 start-2.5">
-            <Badge variant={BADGE_VARIANT[product.badgeLabel] ?? 'gold'}>
-              {t(`badge.${product.badgeLabel}` as TranslationKey)}
+            <Badge variant={BADGE_VARIANT[forceBadge] ?? 'gold'}>
+              {t(`badge.${forceBadge}` as TranslationKey)}
             </Badge>
           </div>
         ) : null}
@@ -82,19 +83,22 @@ export function ProductCard({ product, isMobile, isTablet }: ProductCardProps) {
           </div>
         )}
 
-        <button
-          type="button"
-          aria-label={liked ? t('product.removeFromWishlist') : t('product.addToWishlist')}
-          onClick={(e) => { e.stopPropagation(); toggle(product.id); }}
-          className={cn(
-            'absolute top-2.5 end-2.5 rounded-full border-0 cursor-pointer',
-            'bg-white/90 backdrop-blur-sm shadow-sm grid place-items-center',
-            isMobile ? 'w-8 h-8' : 'w-9 h-9',
-            liked ? 'text-pink-500' : 'text-ink-400',
-          )}
-        >
-          <Heart size={18} fill={liked ? 'var(--color-pink-500)' : 'none'} />
-        </button>
+        {/* Wishlist — top-end corner */}
+        <div className="absolute top-2.5 end-2.5">
+          <button
+            type="button"
+            aria-label={liked ? t('product.removeFromWishlist') : t('product.addToWishlist')}
+            onClick={(e) => { e.stopPropagation(); toggle(product.id); }}
+            className={cn(
+              'rounded-full border-0 cursor-pointer',
+              'bg-white/90 backdrop-blur-sm shadow-sm grid place-items-center',
+              isMobile ? 'w-8 h-8' : 'w-9 h-9',
+              liked ? 'text-pink-500' : 'text-ink-400',
+            )}
+          >
+            <Heart size={18} fill={liked ? 'var(--color-pink-500)' : 'none'} />
+          </button>
+        </div>
 
         {!isMobile && (
           <div

@@ -8,3 +8,4 @@ export { Tile } from './Tile';
 export { Stars } from './Stars';
 export { StarRating } from './StarRating';
 export { Spinner, ErrorState } from './AsyncState';
+export { ShareButton } from './ShareButton';

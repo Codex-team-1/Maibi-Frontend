@@ -37,6 +37,63 @@ const MARQUEE_ITEMS: Array<[string, TranslationKey, string]> = [
   ["◇", "home.marqueeWearableArt", "var(--color-ink-400)"],
 ];
 
+function NoProductsState({ isMobile }: { isMobile: boolean }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center text-center",
+        isMobile ? "py-14 gap-5" : "py-20 gap-6",
+      )}
+    >
+      {/* Logo */}
+      <div className="relative flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-pink-100/60 blur-2xl scale-150" />
+        <div
+          className="relative rounded-[1.5rem] border border-pink-200/80 bg-white/80 backdrop-blur-sm px-8 py-4 flex items-center justify-center"
+          style={{ boxShadow: "0 4px 32px 0 rgba(236,72,153,0.10), 0 1.5px 8px 0 rgba(236,72,153,0.07)" }}
+        >
+          <span
+            className="font-script text-pink-400 select-none leading-none"
+            style={{ fontSize: isMobile ? 52 : 64 }}
+          >
+            Maibi
+          </span>
+        </div>
+        {/* decorative dots */}
+        <span className="absolute -top-1 -end-1 w-2 h-2 rounded-full bg-pink-300/70" />
+        <span className="absolute -bottom-1.5 -start-1.5 w-1.5 h-1.5 rounded-full bg-gold/60" />
+      </div>
+
+      {/* Text */}
+      <div className={cn("flex flex-col items-center", isMobile ? "gap-1.5" : "gap-2")}>
+        <p
+          className={cn(
+            "font-display font-semibold text-ink-900 m-0",
+            isMobile ? "text-xl" : "text-2xl",
+          )}
+        >
+          No Products
+        </p>
+        <p
+          className={cn(
+            "text-ink-400 m-0 max-w-[260px]",
+            isMobile ? "text-[13px]" : "text-sm",
+          )}
+        >
+          New pieces are being crafted with care — check back soon.
+        </p>
+      </div>
+
+      {/* Decorative rule */}
+      <div className="flex items-center gap-3 w-full max-w-[200px]">
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent to-pink-200" />
+        <span className="text-pink-300 text-xs select-none">✦</span>
+        <div className="flex-1 h-px bg-gradient-to-l from-transparent to-pink-200" />
+      </div>
+    </div>
+  );
+}
+
 function SectionTitle({
   children,
   sub,
@@ -452,6 +509,8 @@ export function Home() {
         </SectionTitle>
         {newArrivals.loading ? (
           <Spinner />
+        ) : (newArrivals.data?.items ?? []).length === 0 ? (
+          <NoProductsState isMobile={isMobile} />
         ) : (
           <div
             className={cn(
@@ -459,9 +518,12 @@ export function Home() {
               isMobile ? "grid-cols-2 gap-3.5" : "grid-cols-4 gap-6",
             )}
           >
-            {(newArrivals.data?.items ?? []).map((p) => (
-              <ProductCard key={p.id} product={p} isMobile={isMobile} />
-            ))}
+            {(newArrivals.data?.items ?? []).map((p) => {
+              const isNew = (Date.now() - new Date(p.createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000;
+              return (
+                <ProductCard key={p.id} product={p} isMobile={isMobile} forceBadge={isNew ? 'New' : undefined} />
+              );
+            })}
           </div>
         )}
       </section>
@@ -791,6 +853,8 @@ export function Home() {
         </SectionTitle>
         {featured.loading ? (
           <Spinner />
+        ) : (featured.data?.items ?? []).length === 0 ? (
+          <NoProductsState isMobile={isMobile} />
         ) : (
           <div
             className={cn(
@@ -799,7 +863,7 @@ export function Home() {
             )}
           >
             {(featured.data?.items ?? []).slice(0, 4).map((p) => (
-              <ProductCard key={p.id} product={p} isMobile={isMobile} />
+              <ProductCard key={p.id} product={p} isMobile={isMobile} forceBadge="Featured" />
             ))}
           </div>
         )}

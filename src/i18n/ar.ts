@@ -364,6 +364,13 @@ export const ar: Record<keyof typeof en, string> = {
   'rating.thankYouBody':
     'تمّ إرسال تقييمكِ. نقدّر حقًّا دعمكِ للحرفة الجزائرية.',
 
+  /* ── Share ──────────────────────────────────────────────────────────────── */
+  'share.shareProduct': 'شارك هذه القطعة',
+  'share.shareTo': 'مشاركة على {platform}',
+  'share.copyLink': 'نسخ',
+  'share.copied': 'تمّ النسخ!',
+  'share.close': 'إغلاق لوحة المشاركة',
+
   /* ── Form validation (zod messages, keyed) ──────────────────────────────── */
   'val.nameRequired': 'الاسم مطلوب',
   'val.nameMin': 'يجب ألّا يقلّ الاسم عن حرفين',

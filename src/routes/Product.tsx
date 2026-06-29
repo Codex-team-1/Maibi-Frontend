@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Heart, Check, Clock, Tag, Truck } from 'lucide-react';
-import { Badge, Button, Chip, QuantityStepper, Stars, Spinner, ErrorState } from '@/components/ui';
+import { Badge, Button, Chip, QuantityStepper, Stars, Spinner, ErrorState, ShareButton } from '@/components/ui';
 import { useCart } from '@/store/useCart';
 import { useUI } from '@/store/useUI';
 import { useWishlist } from '@/store/useWishlist';
@@ -394,6 +394,13 @@ export function Product() {
             >
               <Heart size={20} fill={liked ? 'var(--color-pink-500)' : 'none'} />
             </Button>
+            <ShareButton
+              productId={product.id}
+              productName={product.name}
+              price={hasDiscount ? discount.discountedPrice : product.price}
+              imageUrl={mainPhoto}
+              size={isMobile ? 'sm' : 'md'}
+            />
           </div>
         </div>
       </div>

@@ -366,6 +366,13 @@ export const en = {
   'rating.thankYouBody':
     'Your rating has been submitted. We truly appreciate you supporting Algerian craftsmanship.',
 
+  /* ── Share ──────────────────────────────────────────────────────────────── */
+  'share.shareProduct': 'Share this piece',
+  'share.shareTo': 'Share to {platform}',
+  'share.copyLink': 'Copy',
+  'share.copied': 'Copied!',
+  'share.close': 'Close share panel',
+
   /* ── Form validation (zod messages, keyed) ──────────────────────────────── */
   'val.nameRequired': 'Your name is required',
   'val.nameMin': 'Name must be at least 2 characters',

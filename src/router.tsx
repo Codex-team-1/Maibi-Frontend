@@ -7,6 +7,7 @@ import { Wishlist } from '@/routes/Wishlist';
 import { CustomOrder } from '@/routes/CustomOrder';
 import { Checkout } from '@/routes/Checkout';
 import { Rating } from '@/routes/Rating';
+import { NotFound } from '@/routes/NotFound';
 import { AdminLayout } from '@/admin/components/AdminLayout';
 import { RequireAuth } from '@/admin/components/RequireAuth';
 import { Login } from '@/admin/pages/Login';
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'custom-order', element: <CustomOrder /> },
       { path: 'checkout', element: <Checkout /> },
       { path: 'rating', element: <Rating /> },
+      { path: '*', element: <NotFound /> },
     ],
   },
   {
